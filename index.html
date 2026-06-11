@@ -1,4 +1,32 @@
-import { useState, useEffect, useRef } from "react";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💐 Victorian 経費管理</title>
+  <meta name="description" content="株式会社Victorian 経費管理アプリ">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Victorian経費">
+  <meta name="theme-color" content="#e8638c">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💐</text></svg>">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; background: #fdf2f6; font-family: 'Hiragino Sans', 'Meiryo', sans-serif; }
+    input, select, textarea, button { font-family: inherit; }
+    ::-webkit-scrollbar { height: 4px; width: 4px; }
+    ::-webkit-scrollbar-track { background: #fde8ef; }
+    ::-webkit-scrollbar-thumb { background: #e8638c; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
 
 // ===================== デザイントークン =====================
 const C = {
@@ -59,7 +87,7 @@ function loadS(key, fb) { try { const v = localStorage.getItem(key); return v ? 
 function saveS(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
 
 // ===================== メインアプリ =====================
-export default function App() {
+function App() {
   const [purchases, setPurchases] = useState(() => loadS(STORAGE.purchases, []));
   const [bills,     setBills]     = useState(() => loadS(STORAGE.bills, []));
   const [banks,     setBanks]     = useState(() => loadS(STORAGE.banks, DEFAULT_BANKS));
@@ -995,3 +1023,10 @@ function LedgerCard({ l, onEdit, onToggleReceived, onDelete }) {
     </div>
   );
 }
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
