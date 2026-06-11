@@ -1,1032 +1,456 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💐 Victorian 経費管理</title>
-  <meta name="description" content="株式会社Victorian 経費管理アプリ">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Victorian経費">
-  <meta name="theme-color" content="#e8638c">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💐</text></svg>">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #fdf2f6; font-family: 'Hiragino Sans', 'Meiryo', sans-serif; }
-    input, select, textarea, button { font-family: inherit; }
-    ::-webkit-scrollbar { height: 4px; width: 4px; }
-    ::-webkit-scrollbar-track { background: #fde8ef; }
-    ::-webkit-scrollbar-thumb { background: #e8638c; border-radius: 4px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>販売報告 | ヴィクトリアンカフェ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+  :root {
+    --ivory:    #F8F4EE;
+    --parchment:#EDE6D8;
+    --gold:     #B89A5C;
+    --gold-lt:  #D4B97A;
+    --brown:    #4A3728;
+    --brown-md: #7A5C42;
+    --brown-lt: #A07850;
+    --ink:      #2C1F14;
+    --muted:    #8A7060;
+    --border:   #D4C4AE;
+    --shadow:   rgba(74,55,40,0.10);
+    --green:    #4A7856;
+    --red:      #8B3A3A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .logo-line {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--brown);
+    letter-spacing: 0.12em;
+  }
+  .header-rule {
+    display: flex; align-items: center; gap: 12px;
+    margin: 10px auto 0; max-width: 320px;
+  }
+  .header-rule::before, .header-rule::after {
+    content: ''; flex: 1; height: 1px; background: var(--gold);
+  }
+  .header-rule span { color: var(--gold); font-size: 14px; }
+
+  /* ── Card ── */
+  .card {
+    background: var(--ivory);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .card-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── Labels / Inputs ── */
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    margin-top: 14px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="time"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #FFFFFF;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184,154,92,0.12);
+  }
+
+  .time-row {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center;
+  }
+  .time-sep {
+    font-size: 18px; color: var(--muted); text-align: center; padding-top: 2px;
+  }
+
+  .amount-wrap {
+    position: relative;
+  }
+  .amount-wrap input {
+    padding-left: 30px;
+  }
+  .amount-prefix {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 15px; pointer-events: none;
+  }
+
+  textarea.report-area {
+    min-height: 130px;
+    resize: vertical;
+    line-height: 1.8;
+  }
+
+  /* ── Shipping items ── */
+  .ship-list { display: flex; flex-direction: column; gap: 8px; }
+  .ship-item {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
+  }
+  .ship-item input[type="number"] { width: 64px; text-align: center; }
+  .ship-unit {
+    font-size: 13px; color: var(--muted); white-space: nowrap;
+  }
+  .btn-remove {
+    background: none; border: none; cursor: pointer;
+    color: var(--red); font-size: 18px; padding: 0 4px; line-height: 1;
+    opacity: 0.6; transition: opacity 0.15s;
+  }
+  .btn-remove:hover { opacity: 1; }
+  .btn-add {
+    margin-top: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none;
+    border: 1px dashed var(--gold-lt);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--brown-lt);
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn-add:hover { background: rgba(184,154,92,0.08); border-color: var(--gold); }
+
+  /* ── Submit ── */
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--brown) 0%, var(--brown-md) 100%);
+    color: var(--ivory);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 3px 12px rgba(74,55,40,0.25);
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-submit:hover { opacity: 0.88; }
+  .btn-submit:active { transform: scale(0.98); }
+
+  /* ── Success modal ── */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(44,31,20,0.55); backdrop-filter: blur(3px);
+    z-index: 100; align-items: center; justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--ivory);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px;
+    text-align: center;
+    max-width: 320px; width: 90%;
+    box-shadow: 0 8px 32px rgba(44,31,20,0.25);
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.88); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .modal-icon { font-size: 40px; margin-bottom: 12px; }
+  .modal h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px; color: var(--brown); margin-bottom: 8px;
+  }
+  .modal p { font-size: 13px; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+  .modal-time { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; }
+  .btn-modal {
+    background: var(--brown); color: var(--ivory);
+    border: none; border-radius: 6px; padding: 10px 28px;
+    font-family: 'Noto Sans JP', sans-serif; font-size: 14px;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-modal:hover { opacity: 0.8; }
+
+  /* ── Preview section ── */
+  #preview-wrap {
+    display: none;
+    background: var(--ivory);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 14px;
+    box-shadow: 0 2px 10px var(--shadow);
+    white-space: pre-wrap;
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+  .preview-label {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .copy-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; margin-top: 12px;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px; color: var(--brown-lt);
+    cursor: pointer; transition: background 0.15s;
+  }
+  .copy-btn:hover { background: rgba(184,154,92,0.08); }
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
 
+<header>
+  <p class="logo-line">Victorian Café · 株式会社ハイクオリティー</p>
+  <h1>販売日報</h1>
+  <div class="header-rule"><span>✦</span></div>
+</header>
 
-// ===================== デザイントークン =====================
-const C = {
-  primary:    "#e8638c",   // メインピンク
-  primaryDk:  "#c94b74",   // 濃いピンク
-  primaryLt:  "#fde8ef",   // 薄いピンク背景
-  accent:     "#f9a8c4",   // アクセントピンク
-  rose:       "#fdf2f6",   // ページ背景
-  mint:       "#3dba8c",   // 支払済み緑
-  mintLt:     "#e8faf4",
-  warn:       "#f0923a",   // 警告オレンジ
-  danger:     "#e05572",   // エラー赤
-  navy:       "#3a2a3e",   // 見出し暗色
-  gray:       "#7a6a7a",   // サブテキスト
-  border:     "#f0d8e4",   // ボーダー
-  white:      "#ffffff",
-  cardShadow: "0 2px 12px rgba(232,99,140,0.10)",
-};
+<!-- 担当者 & 出勤時間 -->
+<div class="card">
+  <p class="card-title">担当者 / 勤務時間</p>
 
-const DEPT_COLORS  = { "セントラルキッチン": "#f0923a", "カフェ店舗": "#e8638c", "会社": "#a06bbf" };
-const DEPT_BG      = { "セントラルキッチン": "#fff6ee", "カフェ店舗": "#fde8ef", "会社": "#f3eaff" };
+  <label>担当者名</label>
+  <input type="text" id="staff" placeholder="例：山田 花子">
 
-// ===================== 定数 =====================
-const DEPARTMENTS  = ["セントラルキッチン", "カフェ店舗", "会社"];
-const CATEGORIES   = ["消耗品費","仕入高","荷造運賃","広告宣伝費","通信費","旅費交通費","接待交際費","水道光熱費","修繕費","外注費","雑費","その他"];
-const TAX_OPTIONS  = [{ label: "10%", value: 0.1 }, { label: "8%", value: 0.08 }, { label: "非課税", value: 0 }];
-const PAYMENT_TYPES = ["現金", "デビット", "後払い"];
-const DEFAULT_BANKS    = ["楽天銀行", "ゆうちょ銀行", "三菱UFJ", "みずほ", "PayPay銀行"];
-const DEFAULT_DEFERRED = ["メルペイ後払い", "Paidy", "NP後払い", "ネットプロテクションズ"];
-const DEFAULT_BILL_ITEMS = {
-  "セントラルキッチン": ["電気", "ガス", "水道", "電話・通信"],
-  "カフェ店舗":         ["電気", "ガス", "水道", "電話・通信"],
-  "会社":               ["電気", "水道", "電話・通信", "インターネット"]
-};
-const STORAGE = { purchases:"hq_purchases_v1", bills:"hq_bills_v1", banks:"hq_banks_v1", deferred:"hq_deferred_v1", billItems:"hq_bill_items_v1", ledger:"hq_ledger_v1", carryover:"hq_carryover_v1" };
+  <label>出勤時間</label>
+  <div class="time-row">
+    <input type="time" id="time-from" value="11:30">
+    <span class="time-sep">〜</span>
+    <input type="time" id="time-to" value="18:00">
+  </div>
+</div>
 
-const EMPTY_LEDGER = { date: new Date().toISOString().slice(0,10), department:"カフェ店舗", type:"入金", amount:"", description:"", paymentType:"現金", bank:"", received:false, expectedDate:"", memo:"" };
+<!-- 売上 -->
+<div class="card">
+  <p class="card-title">売上報告</p>
 
-const EMPTY_PURCHASE = { date: new Date().toISOString().slice(0,10), department:"カフェ店舗", shop:"", amount:"", paymentType:"現金", bank:"", customBank:"", deferredService:"", customDeferred:"", taxRate:0.1, category:"消耗品費", yayoiDone:false, paid:false, paymentDueDate:"", memo:"" };
-const EMPTY_BILL     = { department:"カフェ店舗", item:"電気", customItem:"", billingDate: new Date().toISOString().slice(0,10), dueDate:"", amount:"", taxRate:0.1, category:"水道光熱費", paid:false, paidDate:"", memo:"" };
+  <label>売上金額（円）</label>
+  <div class="amount-wrap">
+    <span class="amount-prefix">¥</span>
+    <input type="number" id="sales" placeholder="0" min="0" step="1">
+  </div>
+</div>
 
-// ===================== ユーティリティ =====================
-function calcTax(amount, rate) {
-  const n = parseFloat(amount);
-  if (!n || isNaN(n)) return { net:0, tax:0, total:0 };
-  if (rate === 0) return { net:n, tax:0, total:n };
-  const net = Math.round(n / (1 + rate));
-  return { net, tax: n - net, total: n };
-}
-function fmt(n) { return Number(n||0).toLocaleString("ja-JP"); }
-function monthKey(d) { return d ? d.slice(0,7) : ""; }
-function getMonths(purchases, bills) {
-  const s = new Set();
-  [...purchases,...bills].forEach(r => { if (r.date||r.billingDate) s.add(monthKey(r.date||r.billingDate)); });
-  return Array.from(s).sort().reverse();
-}
-function loadS(key, fb) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fb; } catch { return fb; } }
-function saveS(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+<!-- 今日の報告 -->
+<div class="card">
+  <p class="card-title">今日の報告</p>
 
-// ===================== メインアプリ =====================
-function App() {
-  const [purchases, setPurchases] = useState(() => loadS(STORAGE.purchases, []));
-  const [bills,     setBills]     = useState(() => loadS(STORAGE.bills, []));
-  const [banks,     setBanks]     = useState(() => loadS(STORAGE.banks, DEFAULT_BANKS));
-  const [deferred,  setDeferred]  = useState(() => loadS(STORAGE.deferred, DEFAULT_DEFERRED));
-  const [billItems, setBillItems] = useState(() => loadS(STORAGE.billItems, DEFAULT_BILL_ITEMS));
-  const [ledger,    setLedger]    = useState(() => loadS(STORAGE.ledger, []));
-  const [carryover, setCarryover] = useState(() => loadS(STORAGE.carryover, {"セントラルキッチン":0,"カフェ店舗":0,"会社":0}));
-  const [tab, setTab]             = useState("purchase");
-  const [toast, setToast]         = useState(null);
-  const toastRef = useRef(null);
+  <label>報告内容</label>
+  <textarea class="report-area" id="report" placeholder="接客状況・商品の反応・気づいたこと など&#10;自由にご記入ください"></textarea>
+</div>
 
-  useEffect(() => saveS(STORAGE.purchases, purchases), [purchases]);
-  useEffect(() => saveS(STORAGE.bills,     bills),     [bills]);
-  useEffect(() => saveS(STORAGE.banks,     banks),     [banks]);
-  useEffect(() => saveS(STORAGE.deferred,  deferred),  [deferred]);
-  useEffect(() => saveS(STORAGE.billItems, billItems), [billItems]);
-  useEffect(() => saveS(STORAGE.ledger,    ledger),    [ledger]);
-  useEffect(() => saveS(STORAGE.carryover, carryover), [carryover]);
+<!-- 追加発送依頼 -->
+<div class="card">
+  <p class="card-title">追加発送依頼</p>
 
-  function showToast(msg, color = C.mint) {
-    setToast({ msg, color });
-    clearTimeout(toastRef.current);
-    toastRef.current = setTimeout(() => setToast(null), 2500);
-  }
-
-  const unpaidBills = bills.filter(b => !b.paid).length;
-  const unyayoi     = purchases.filter(p => !p.yayoiDone).length;
-
-  const TABS = [["purchase","🛒","購入記録"],["bill","📄","請求書"],["ledger","💰","出納帳"],["report","📊","月次"],["settings","⚙️","設定"]];
-
-  return (
-    <div style={{ fontFamily:"'Hiragino Sans','Meiryo',sans-serif", background: C.rose, minHeight:"100vh", maxWidth:700, margin:"0 auto" }}>
-
-      {/* ヘッダー */}
-      <div style={{ background:`linear-gradient(135deg, ${C.primaryDk} 0%, ${C.primary} 60%, ${C.accent} 100%)`, color:C.white, padding:"18px 18px 14px", position:"relative", overflow:"hidden" }}>
-        <div style={{ position:"absolute", top:-30, right:-20, width:120, height:120, borderRadius:"50%", background:"rgba(255,255,255,0.08)" }} />
-        <div style={{ position:"absolute", bottom:-40, left:-10, width:100, height:100, borderRadius:"50%", background:"rgba(255,255,255,0.06)" }} />
-        <div style={{ fontSize:11, letterSpacing:3, opacity:0.8, marginBottom:4, textTransform:"uppercase" }}>株式会社Victorian</div>
-        <div style={{ fontSize:19, fontWeight:800, letterSpacing:0.5 }}>💐 経費管理</div>
-        <div style={{ display:"flex", gap:8, marginTop:12, flexWrap:"wrap" }}>
-          <Pill label="請求書 未払い" count={unpaidBills} bg="rgba(255,255,255,0.22)" />
-          <Pill label="弥生 未記録"   count={unyayoi}     bg="rgba(255,255,255,0.22)" />
-          <Pill label="購入記録"      count={purchases.length} bg="rgba(255,255,255,0.13)" />
-        </div>
-      </div>
-
-      {/* タブバー */}
-      <div style={{ display:"flex", background:C.white, borderBottom:`2px solid ${C.border}`, boxShadow:"0 2px 8px rgba(232,99,140,0.07)" }}>
-        {TABS.map(([k,icon,label]) => (
-          <button key={k} onClick={() => setTab(k)} style={{
-            flex:1, padding:"11px 4px 9px", border:"none", background:"none", cursor:"pointer",
-            fontSize:12, color: tab===k ? C.primary : C.gray,
-            fontWeight: tab===k ? 700 : 400,
-            borderBottom: `3px solid ${tab===k ? C.primary : "transparent"}`,
-            transition:"color 0.2s, border-color 0.2s",
-          }}>
-            <div style={{ fontSize:16 }}>{icon}</div>
-            <div style={{ marginTop:1 }}>{label}</div>
-          </button>
-        ))}
-      </div>
-
-      <div style={{ padding:"14px 13px 96px" }}>
-        {tab==="purchase" && <PurchaseTab purchases={purchases} setPurchases={setPurchases} banks={banks} deferred={deferred} showToast={showToast} />}
-        {tab==="bill"     && <BillTab     bills={bills} setBills={setBills} billItems={billItems} setBillItems={setBillItems} showToast={showToast} />}
-        {tab==="ledger"   && <LedgerTab   ledger={ledger} setLedger={setLedger} carryover={carryover} setCarryover={setCarryover} banks={banks} showToast={showToast} />}
-        {tab==="report"   && <ReportTab   purchases={purchases} bills={bills} ledger={ledger} />}
-        {tab==="settings" && <SettingsTab banks={banks} setBanks={setBanks} deferred={deferred} setDeferred={setDeferred} billItems={billItems} setBillItems={setBillItems} setPurchases={setPurchases} setBills={setBills} setLedger={setLedger} showToast={showToast} />}
-      </div>
-
-      {toast && (
-        <div style={{ position:"fixed", bottom:90, left:"50%", transform:"translateX(-50%)", background:toast.color, color:C.white, borderRadius:28, padding:"11px 24px", fontSize:14, fontWeight:700, boxShadow:"0 4px 20px rgba(0,0,0,0.18)", zIndex:200, whiteSpace:"nowrap", letterSpacing:0.5 }}>
-          {toast.msg}
-        </div>
-      )}
+  <div class="ship-list" id="ship-list">
+    <div class="ship-item">
+      <input type="text" placeholder="商品名（例：ケーキ缶 抹茶）">
+      <input type="number" placeholder="0" min="0" style="width:64px;text-align:center;">
+      <span class="ship-unit">個</span>
+      <button class="btn-remove" onclick="removeItem(this)" title="削除">×</button>
     </div>
-  );
-}
+  </div>
 
-// ===================== 購入記録タブ =====================
-function PurchaseTab({ purchases, setPurchases, banks, deferred, showToast }) {
-  const [mode, setMode]         = useState("list");
-  const [form, setForm]         = useState(EMPTY_PURCHASE);
-  const [editId, setEditId]     = useState(null);
-  const [filterDept, setFD]     = useState("all");
-  const [filterStatus, setFS]   = useState("all");
-  const [confirmDel, setCD]     = useState(null);
+  <button class="btn-add" onclick="addItem()">＋ 商品を追加</button>
+</div>
 
-  function hc(e) { const { name, value, type, checked } = e.target; setForm(f=>({...f,[name]:type==="checkbox"?checked:value})); }
+<!-- 送信ボタン -->
+<button class="btn-submit" onclick="submitReport()">日報を完成させる</button>
 
-  function handleSubmit() {
-    if (!form.shop.trim()||!form.amount) { showToast("店名と金額は必須です", C.danger); return; }
-    const bank = form.paymentType==="デビット"?(form.bank==="__custom__"?form.customBank:form.bank):"";
-    const ds   = form.paymentType==="後払い"?(form.deferredService==="__custom__"?form.customDeferred:form.deferredService):"";
-    if (editId!==null) {
-      setPurchases(ps=>ps.map(p=>p.id===editId?{...form,bank,deferredService:ds,id:editId}:p));
-      showToast("✓ 更新しました"); setEditId(null);
+<!-- プレビュー -->
+<div id="preview-wrap">
+  <span class="preview-label">REPORT PREVIEW</span>
+  <div id="preview-text"></div>
+  <button class="copy-btn" onclick="copyText()">📋 テキストをコピー</button>
+</div>
+
+<!-- 完了モーダル -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <h2>日報を作成しました</h2>
+    <p>下のプレビューからテキストをコピーして、LINEやメールで送信してください。</p>
+    <p class="modal-time" id="modal-time"></p>
+    <br>
+    <button class="btn-modal" onclick="closeModal()">確認する</button>
+  </div>
+</div>
+
+<script>
+  function addItem() {
+    const list = document.getElementById('ship-list');
+    const div = document.createElement('div');
+    div.className = 'ship-item';
+    div.innerHTML = `
+      <input type="text" placeholder="商品名">
+      <input type="number" placeholder="0" min="0" style="width:64px;text-align:center;">
+      <span class="ship-unit">個</span>
+      <button class="btn-remove" onclick="removeItem(this)" title="削除">×</button>
+    `;
+    list.appendChild(div);
+    div.querySelector('input[type="text"]').focus();
+  }
+
+  function removeItem(btn) {
+    const list = document.getElementById('ship-list');
+    if (list.children.length <= 1) {
+      // 最後の1行はクリアするだけ
+      const inputs = btn.closest('.ship-item').querySelectorAll('input');
+      inputs.forEach(i => i.value = '');
     } else {
-      setPurchases(ps=>[{...form,bank,deferredService:ds,id:Date.now()},...ps]);
-      showToast("✓ 追加しました");
+      btn.closest('.ship-item').remove();
     }
-    setForm({...EMPTY_PURCHASE,date:form.date,department:form.department}); setMode("list");
   }
 
-  function startEdit(r) {
-    const bv = banks.includes(r.bank)?r.bank:(r.bank?"__custom__":"");
-    const dv = deferred.includes(r.deferredService)?r.deferredService:(r.deferredService?"__custom__":"");
-    setForm({...r,bank:bv,customBank:banks.includes(r.bank)?"":r.bank,deferredService:dv,customDeferred:deferred.includes(r.deferredService)?"":r.deferredService});
-    setEditId(r.id); setMode("add");
+  function fmtTime(t) {
+    if (!t) return '−';
+    const [h, m] = t.split(':');
+    return `${h}:${m}`;
   }
 
-  function doDelete(id) { setPurchases(ps=>ps.filter(p=>p.id!==id)); setCD(null); showToast("削除しました","#aaa"); }
+  function fmtYen(v) {
+    const n = parseInt(v, 10);
+    if (isNaN(n)) return '−';
+    return '¥' + n.toLocaleString('ja-JP');
+  }
 
-  function exportCSV(list) {
-    const hdr = ["日付","部門","店名","金額(税込)","税抜","消費税","税率","支払方法","詳細","科目","弥生記録","入金済","入金予定日","メモ"];
-    const rows = list.map(r=>{
-      const {net,tax}=calcTax(r.amount,r.taxRate);
-      const det=r.paymentType==="デビット"?r.bank:r.paymentType==="後払い"?r.deferredService:"";
-      return [r.date,r.department,r.shop,r.amount,net,tax,r.taxRate===0?"非課税":`${r.taxRate*100}%`,r.paymentType,det,r.category,r.yayoiDone?"済":"未",r.paid?"済":"未",r.paymentDueDate||"",r.memo||""].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",");
+  function buildText() {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${'日月火水木金土'[now.getDay()]}）`;
+
+    const staff    = document.getElementById('staff').value.trim() || '（未入力）';
+    const timeFrom = fmtTime(document.getElementById('time-from').value);
+    const timeTo   = fmtTime(document.getElementById('time-to').value);
+    const sales    = fmtYen(document.getElementById('sales').value);
+    const report   = document.getElementById('report').value.trim() || '（なし）';
+
+    // 発送リスト
+    const items = [];
+    document.querySelectorAll('#ship-list .ship-item').forEach(row => {
+      const name = row.querySelector('input[type="text"]').value.trim();
+      const qty  = row.querySelector('input[type="number"]').value;
+      if (name && qty) items.push(`　・${name}　${qty}個`);
     });
-    const blob=new Blob(["\uFEFF"+[hdr.join(","),...rows].join("\n")],{type:"text/csv;charset=utf-8;"});
-    Object.assign(document.createElement("a"),{href:URL.createObjectURL(blob),download:`購入記録_${new Date().toISOString().slice(0,10)}.csv`}).click();
-    showToast("📥 CSV出力しました");
+    const shipStr = items.length ? items.join('\n') : '　なし';
+
+    return [
+      `📋 販売日報`,
+      `━━━━━━━━━━━━━━━`,
+      `📅 日付　　${dateStr}`,
+      `👤 担当者　${staff}`,
+      `🕐 勤務時間　${timeFrom} 〜 ${timeTo}`,
+      `━━━━━━━━━━━━━━━`,
+      `💴 売上金額　${sales}`,
+      `━━━━━━━━━━━━━━━`,
+      `📝 今日の報告`,
+      report,
+      `━━━━━━━━━━━━━━━`,
+      `📦 追加発送依頼`,
+      shipStr,
+      `━━━━━━━━━━━━━━━`,
+      `Victorian Café / 株式会社ハイクオリティー`,
+    ].join('\n');
   }
 
-  const filtered = purchases.filter(p=>{
-    if (filterDept!=="all"&&p.department!==filterDept) return false;
-    if (filterStatus==="unyayoi"&&p.yayoiDone) return false;
-    if (filterStatus==="unpaid"&&(p.paid||p.paymentType!=="後払い")) return false;
-    return true;
-  }).sort((a,b)=>b.date.localeCompare(a.date));
-
-  if (mode==="add") return <PurchaseForm form={form} editId={editId} onChange={hc} onSubmit={handleSubmit} onCancel={()=>{setMode("list");setEditId(null);setForm(EMPTY_PURCHASE);}} banks={banks} deferred={deferred} setForm={setForm} />;
-
-  return (
-    <>
-      <ScrollRow>
-        {[["all","すべて"],...DEPARTMENTS.map(d=>[d,d])].map(([k,l])=>(
-          <Chip key={k} label={l} active={filterDept===k} color={DEPT_COLORS[k]||C.primary} onClick={()=>setFD(k)} />
-        ))}
-      </ScrollRow>
-      <ScrollRow style={{marginTop:7}}>
-        {[["all","全件"],["unyayoi","弥生未記録"],["unpaid","後払い未入金"]].map(([k,l])=>(
-          <Chip key={k} label={l} active={filterStatus===k} color={C.primary} onClick={()=>setFS(k)} />
-        ))}
-        <button onClick={()=>exportCSV(filtered)} style={csvBtn}>📥 CSV</button>
-      </ScrollRow>
-
-      {filtered.length>0 && (
-        <div style={{fontSize:13,color:C.gray,textAlign:"right",margin:"8px 0 4px"}}>
-          合計: <strong style={{color:C.primary}}>¥{fmt(filtered.reduce((s,r)=>s+(parseFloat(r.amount)||0),0))}</strong>（{filtered.length}件）
-        </div>
-      )}
-
-      {filtered.length===0 ? <Empty text="記録がありません" /> : filtered.map(r=>(
-        <PurchaseCard key={r.id} r={r}
-          onEdit={()=>startEdit(r)}
-          onToggleYayoi={()=>setPurchases(ps=>ps.map(p=>p.id===r.id?{...p,yayoiDone:!p.yayoiDone}:p))}
-          onTogglePaid={()=>setPurchases(ps=>ps.map(p=>p.id===r.id?{...p,paid:!p.paid}:p))}
-          onDelete={()=>setCD(r.id)} />
-      ))}
-
-      <Fab onClick={()=>{setForm(EMPTY_PURCHASE);setEditId(null);setMode("add");}} />
-      <Confirm open={confirmDel} onCancel={()=>setCD(null)} onConfirm={()=>doDelete(confirmDel)} />
-    </>
-  );
-}
-
-function PurchaseForm({ form, editId, onChange, onSubmit, onCancel, banks, deferred, setForm }) {
-  return (
-    <FormCard title={editId!==null?"✏️ 購入記録を編集":"✨ 新規購入記録"}>
-      <Lbl>購入日</Lbl>
-      <input type="date" name="date" value={form.date} onChange={onChange} style={IS} />
-      <Lbl>部門 *</Lbl>
-      <DeptSel value={form.department} onChange={v=>setForm(f=>({...f,department:v}))} />
-      <Lbl>店名・サービス名 *</Lbl>
-      <input type="text" name="shop" value={form.shop} onChange={onChange} placeholder="例：Amazon、楽天市場" style={IS} />
-      <Lbl>金額（税込） *</Lbl>
-      <input type="number" name="amount" value={form.amount} onChange={onChange} placeholder="例：1980" style={IS} />
-      <TaxPrev amount={form.amount} rate={form.taxRate} />
-      <Lbl>消費税</Lbl>
-      <TaxSel value={form.taxRate} onChange={v=>setForm(f=>({...f,taxRate:v}))} />
-      <Lbl>支払方法</Lbl>
-      <PaySel value={form.paymentType} onChange={v=>setForm(f=>({...f,paymentType:v}))} />
-      {form.paymentType==="デビット" && <BankSel form={form} onChange={onChange} banks={banks} />}
-      {form.paymentType==="後払い"   && <DefSel  form={form} onChange={onChange} deferred={deferred} />}
-      <Lbl>勘定科目</Lbl>
-      <select name="category" value={form.category} onChange={onChange} style={IS}>{CATEGORIES.map(c=><option key={c}>{c}</option>)}</select>
-      <div style={{display:"flex",gap:10,marginBottom:14}}>
-        <ChkToggle label="弥生に記録済み" name="yayoiDone" checked={form.yayoiDone} onChange={onChange} color={C.primary} />
-        <ChkToggle label="入金済み"       name="paid"      checked={form.paid}      onChange={onChange} color={C.mint}    />
-      </div>
-      <Lbl>メモ</Lbl>
-      <textarea name="memo" value={form.memo} onChange={onChange} rows={2} placeholder="備考、注文番号など" style={{...IS,resize:"vertical"}} />
-      <FormBtns onCancel={onCancel} onSubmit={onSubmit} isEdit={editId!==null} />
-    </FormCard>
-  );
-}
-
-function PurchaseCard({ r, onEdit, onToggleYayoi, onTogglePaid, onDelete }) {
-  const { net } = calcTax(r.amount, r.taxRate);
-  const dc = DEPT_COLORS[r.department]||C.primary;
-  const payLabel = r.paymentType==="デビット"?`${r.paymentType}（${r.bank}）`:r.paymentType==="後払い"?`${r.paymentType}（${r.deferredService}）`:r.paymentType;
-  const leftColor = !r.yayoiDone ? C.danger : (!r.paid&&r.paymentType==="後払い") ? C.warn : C.mint;
-
-  return (
-    <div style={{ background:C.white, borderRadius:14, marginBottom:10, padding:14, boxShadow:C.cardShadow, borderLeft:`4px solid ${leftColor}` }}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div style={{flex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3,flexWrap:"wrap"}}>
-            <span style={{background:dc,color:C.white,fontSize:10,borderRadius:12,padding:"2px 9px",fontWeight:700,letterSpacing:0.5}}>{r.department}</span>
-            <span style={{fontWeight:700,fontSize:15,color:C.navy}}>{r.shop}</span>
-          </div>
-          <div style={{fontSize:12,color:C.gray}}>{r.date}　{r.category}　{payLabel}</div>
-        </div>
-        <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-          <div style={{fontWeight:800,fontSize:17,color:C.navy}}>¥{fmt(r.amount)}</div>
-          {r.taxRate>0 && <div style={{fontSize:11,color:"#bbb"}}>税抜¥{fmt(net)}</div>}
-          {r.taxRate===0 && <div style={{fontSize:11,color:"#bbb"}}>非課税</div>}
-        </div>
-      </div>
-      {r.paymentDueDate&&r.paymentType==="後払い" && <div style={{fontSize:12,color:C.warn,marginTop:4}}>📅 入金予定: {r.paymentDueDate}</div>}
-      {r.memo && <div style={{fontSize:12,color:C.gray,marginTop:3,fontStyle:"italic"}}>💬 {r.memo}</div>}
-      <div style={{display:"flex",gap:6,marginTop:10,flexWrap:"wrap"}}>
-        <MiniToggle label="弥生" done={r.yayoiDone} onClick={onToggleYayoi} ac={C.primary} />
-        {r.paymentType==="後払い" && <MiniToggle label="入金" done={r.paid} onClick={onTogglePaid} ac={C.mint} />}
-        <PillBtn onClick={onEdit} bg="#f9f0f5" color={C.gray}>✏️ 編集</PillBtn>
-        <PillBtn onClick={onDelete} bg="#fff0f4" color={C.danger} style={{marginLeft:"auto"}}>🗑</PillBtn>
-      </div>
-    </div>
-  );
-}
-
-// ===================== 請求書タブ =====================
-function BillTab({ bills, setBills, billItems, setBillItems, showToast }) {
-  const [mode,setMode]       = useState("list");
-  const [form,setForm]       = useState(EMPTY_BILL);
-  const [editId,setEditId]   = useState(null);
-  const [filterDept,setFD]   = useState("all");
-  const [filterStatus,setFS] = useState("all");
-  const [confirmDel,setCD]   = useState(null);
-
-  function hc(e){ const{name,value,type,checked}=e.target; setForm(f=>({...f,[name]:type==="checkbox"?checked:value})); }
-
-  function handleSubmit() {
-    if (!form.amount){ showToast("金額は必須です",C.danger); return; }
-    const item = form.item==="__custom__"?form.customItem:form.item;
-    if (editId!==null){ setBills(bs=>bs.map(b=>b.id===editId?{...form,item,id:editId}:b)); showToast("✓ 更新しました"); setEditId(null); }
-    else              { setBills(bs=>[{...form,item,id:Date.now()},...bs]); showToast("✓ 追加しました"); }
-    setForm({...EMPTY_BILL,department:form.department}); setMode("list");
-  }
-
-  function startEdit(b){
-    const items=billItems[b.department]||[];
-    const iv=items.includes(b.item)?b.item:(b.item?"__custom__":"");
-    setForm({...b,item:iv,customItem:items.includes(b.item)?"":b.item});
-    setEditId(b.id); setMode("add");
-  }
-
-  function doDelete(id){ setBills(bs=>bs.filter(b=>b.id!==id)); setCD(null); showToast("削除しました","#aaa"); }
-  function togglePaid(id){ setBills(bs=>bs.map(b=>{ if(b.id!==id)return b; return {...b,paid:!b.paid,paidDate:!b.paid?new Date().toISOString().slice(0,10):""}; })); }
-
-  const filtered = bills.filter(b=>{
-    if (filterDept!=="all"&&b.department!==filterDept) return false;
-    if (filterStatus==="unpaid"&&b.paid)  return false;
-    if (filterStatus==="paid"&&!b.paid)   return false;
-    return true;
-  }).sort((a,b)=>(b.billingDate||"").localeCompare(a.billingDate||""));
-
-  if (mode==="add") return <BillForm form={form} editId={editId} onChange={hc} onSubmit={handleSubmit} onCancel={()=>{setMode("list");setEditId(null);setForm(EMPTY_BILL);}} billItems={billItems} setForm={setForm} />;
-
-  return (
-    <>
-      <ScrollRow>
-        {[["all","すべて"],...DEPARTMENTS.map(d=>[d,d])].map(([k,l])=>(
-          <Chip key={k} label={l} active={filterDept===k} color={DEPT_COLORS[k]||C.primary} onClick={()=>setFD(k)} />
-        ))}
-      </ScrollRow>
-      <ScrollRow style={{marginTop:7}}>
-        {[["all","全件"],["unpaid","未払い"],["paid","支払済み"]].map(([k,l])=>(
-          <Chip key={k} label={l} active={filterStatus===k} color={k==="unpaid"?C.danger:k==="paid"?C.mint:C.primary} onClick={()=>setFS(k)} />
-        ))}
-      </ScrollRow>
-      {filtered.length===0 ? <Empty text="請求書がありません" /> : filtered.map(b=>(
-        <BillCard key={b.id} b={b} onEdit={()=>startEdit(b)} onTogglePaid={()=>togglePaid(b.id)} onDelete={()=>setCD(b.id)} />
-      ))}
-      <Fab onClick={()=>{setForm(EMPTY_BILL);setEditId(null);setMode("add");}} />
-      <Confirm open={confirmDel} onCancel={()=>setCD(null)} onConfirm={()=>doDelete(confirmDel)} />
-    </>
-  );
-}
-
-function BillForm({ form, editId, onChange, onSubmit, onCancel, billItems, setForm }) {
-  const items = billItems[form.department]||[];
-  return (
-    <FormCard title={editId!==null?"✏️ 請求書を編集":"📄 請求書を追加"}>
-      <Lbl>請求日</Lbl>
-      <input type="date" name="billingDate" value={form.billingDate} onChange={onChange} style={IS} />
-      <Lbl>部門 *</Lbl>
-      <DeptSel value={form.department} onChange={v=>setForm(f=>({...f,department:v,item:""}))} />
-      <Lbl>項目 *</Lbl>
-      <select name="item" value={form.item} onChange={onChange} style={IS}>
-        <option value="">選択してください</option>
-        {items.map(it=><option key={it}>{it}</option>)}
-        <option value="__custom__">＋ その他（直接入力）</option>
-      </select>
-      {form.item==="__custom__" && <input type="text" name="customItem" value={form.customItem} onChange={onChange} placeholder="項目名" style={{...IS,marginTop:6}} />}
-      <Lbl>金額（税込） *</Lbl>
-      <input type="number" name="amount" value={form.amount} onChange={onChange} placeholder="例：15000" style={IS} />
-      <TaxPrev amount={form.amount} rate={form.taxRate} />
-      <Lbl>消費税</Lbl>
-      <TaxSel value={form.taxRate} onChange={v=>setForm(f=>({...f,taxRate:v}))} />
-      <Lbl>勘定科目</Lbl>
-      <select name="category" value={form.category} onChange={onChange} style={IS}>{CATEGORIES.map(c=><option key={c}>{c}</option>)}</select>
-      <Lbl>支払期限</Lbl>
-      <input type="date" name="dueDate" value={form.dueDate} onChange={onChange} style={IS} />
-      <div style={{display:"flex",gap:10,marginBottom:14}}>
-        <ChkToggle label="支払済み" name="paid" checked={form.paid} onChange={onChange} color={C.mint} />
-      </div>
-      {form.paid && (<><Lbl>支払日</Lbl><input type="date" name="paidDate" value={form.paidDate} onChange={onChange} style={IS} /></>)}
-      <Lbl>メモ</Lbl>
-      <textarea name="memo" value={form.memo} onChange={onChange} rows={2} placeholder="備考など" style={{...IS,resize:"vertical"}} />
-      <FormBtns onCancel={onCancel} onSubmit={onSubmit} isEdit={editId!==null} />
-    </FormCard>
-  );
-}
-
-function BillCard({ b, onEdit, onTogglePaid, onDelete }) {
-  const dc = DEPT_COLORS[b.department]||C.primary;
-  const isOverdue = !b.paid&&b.dueDate&&b.dueDate<new Date().toISOString().slice(0,10);
-  const leftColor = b.paid ? C.mint : isOverdue ? C.danger : C.warn;
-
-  return (
-    <div style={{ background: b.paid ? C.mintLt : C.white, borderRadius:14, marginBottom:10, padding:14, boxShadow:C.cardShadow, borderLeft:`4px solid ${leftColor}` }}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div style={{flex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3,flexWrap:"wrap"}}>
-            <span style={{background:dc,color:C.white,fontSize:10,borderRadius:12,padding:"2px 9px",fontWeight:700}}>{b.department}</span>
-            <span style={{fontWeight:700,fontSize:15,color:C.navy}}>{b.item}</span>
-            {isOverdue && <span style={{background:C.danger,color:C.white,fontSize:10,borderRadius:10,padding:"2px 8px",fontWeight:700}}>期限超過</span>}
-          </div>
-          <div style={{fontSize:12,color:C.gray}}>請求日: {b.billingDate}　{b.category}</div>
-          {b.dueDate && <div style={{fontSize:12,color:isOverdue?C.danger:C.gray}}>支払期限: {b.dueDate}</div>}
-          {b.paid&&b.paidDate && <div style={{fontSize:12,color:C.mint,fontWeight:600}}>✓ 支払済み: {b.paidDate}</div>}
-        </div>
-        <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-          <div style={{fontWeight:800,fontSize:17,color:C.navy}}>¥{fmt(b.amount)}</div>
-          {b.taxRate>0 && <div style={{fontSize:11,color:"#bbb"}}>税抜¥{fmt(calcTax(b.amount,b.taxRate).net)}</div>}
-        </div>
-      </div>
-      {b.memo && <div style={{fontSize:12,color:C.gray,marginTop:3,fontStyle:"italic"}}>💬 {b.memo}</div>}
-      <div style={{display:"flex",gap:6,marginTop:10,flexWrap:"wrap"}}>
-        <button onClick={onTogglePaid} style={{
-          padding:"6px 14px", borderRadius:20, fontSize:12, cursor:"pointer", fontWeight:700, border:"none",
-          background: b.paid ? C.mint : C.primaryLt,
-          color: b.paid ? C.white : C.primary,
-          boxShadow: b.paid ? "0 2px 8px rgba(61,186,140,0.3)" : "0 2px 8px rgba(232,99,140,0.15)"
-        }}>
-          {b.paid ? "✓ 支払済み" : "未払い → 支払済みに"}
-        </button>
-        <PillBtn onClick={onEdit} bg="#f9f0f5" color={C.gray}>✏️</PillBtn>
-        <PillBtn onClick={onDelete} bg="#fff0f4" color={C.danger} style={{marginLeft:"auto"}}>🗑</PillBtn>
-      </div>
-    </div>
-  );
-}
-
-// ===================== 月次レポート =====================
-function ReportTab({ purchases, bills, ledger }) {
-  const months = getMonths(purchases, bills);
-  const [month, setMonth] = useState(months[0]||new Date().toISOString().slice(0,7));
-
-  const mp = purchases.filter(r=>monthKey(r.date)===month);
-  const mb = bills.filter(b=>monthKey(b.billingDate)===month);
-  const ml = ledger.filter(l=>monthKey(l.date)===month);
-  const allItems = [...mp.map(r=>({...r,source:"purchase",amount:parseFloat(r.amount)||0})),...mb.map(b=>({...b,source:"bill",amount:parseFloat(b.amount)||0}))];
-  const totalAll = allItems.reduce((s,r)=>s+r.amount,0);
-  const byDept   = {};
-  DEPARTMENTS.forEach(d=>{ byDept[d]=allItems.filter(r=>r.department===d).reduce((s,r)=>s+r.amount,0); });
-  const byCat = {};
-  allItems.forEach(r=>{ byCat[r.category]=(byCat[r.category]||0)+r.amount; });
-  const unpaidBills = mb.filter(b=>!b.paid);
-
-  // 出納帳サマリー（部門別）
-  const ledgerByDept = {};
-  DEPARTMENTS.forEach(d=>{
-    const dl = ml.filter(l=>l.department===d);
-    ledgerByDept[d] = {
-      in:  dl.filter(l=>l.type==="入金").reduce((s,l)=>s+(parseFloat(l.amount)||0),0),
-      out: dl.filter(l=>l.type==="出金").reduce((s,l)=>s+(parseFloat(l.amount)||0),0),
-    };
-  });
-
-  return (
-    <div>
-      <div style={{background:C.white,borderRadius:12,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",gap:10,boxShadow:C.cardShadow}}>
-        <span style={{fontSize:13,color:C.gray,fontWeight:600,whiteSpace:"nowrap"}}>表示月：</span>
-        <select value={month} onChange={e=>setMonth(e.target.value)} style={{...IS,marginBottom:0,flex:1}}>
-          {months.length===0?<option>データなし</option>:months.map(m=><option key={m}>{m}</option>)}
-        </select>
-      </div>
-
-      {months.length===0 ? <Empty text="データがありません" /> : (
-        <>
-          <div style={{background:`linear-gradient(135deg,${C.primaryDk},${C.primary})`,color:C.white,borderRadius:16,padding:"20px 20px 16px",marginBottom:14,position:"relative",overflow:"hidden"}}>
-            <div style={{position:"absolute",top:-20,right:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}} />
-            <div style={{fontSize:13,opacity:0.8}}>{month} 経費合計</div>
-            <div style={{fontSize:30,fontWeight:900,marginTop:2}}>¥{fmt(totalAll)}</div>
-            <div style={{fontSize:12,opacity:0.7,marginTop:6}}>購入記録 {mp.length}件　請求書 {mb.length}件</div>
-          </div>
-
-          <SectionCard title="🏢 部門別">
-            {DEPARTMENTS.map(d=>(
-              <div key={d} style={{display:"flex",alignItems:"center",marginBottom:12}}>
-                <div style={{width:5,height:38,borderRadius:3,background:DEPT_COLORS[d],marginRight:10,flexShrink:0}} />
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",justifyContent:"space-between"}}>
-                    <span style={{fontSize:14,fontWeight:700,color:C.navy}}>{d}</span>
-                    <span style={{fontSize:14,fontWeight:800,color:DEPT_COLORS[d]}}>¥{fmt(byDept[d])}</span>
-                  </div>
-                  <div style={{background:C.border,borderRadius:4,height:7,marginTop:5}}>
-                    <div style={{background:DEPT_COLORS[d],borderRadius:4,height:7,width:`${totalAll>0?Math.round(byDept[d]/totalAll*100):0}%`,transition:"width 0.5s"}} />
-                  </div>
-                  <div style={{fontSize:11,color:C.gray,textAlign:"right",marginTop:2}}>{totalAll>0?Math.round(byDept[d]/totalAll*100):0}%</div>
-                </div>
-              </div>
-            ))}
-          </SectionCard>
-
-          <SectionCard title="📂 科目別">
-            {Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>(
-              <div key={cat} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-                <span style={{fontSize:13,color:C.gray}}>{cat}</span>
-                <span style={{fontSize:14,fontWeight:800,color:C.navy}}>¥{fmt(amt)}</span>
-              </div>
-            ))}
-          </SectionCard>
-
-          {unpaidBills.length>0 && (
-            <SectionCard title={`⚠️ 未払い請求書（${unpaidBills.length}件）`}>
-              {unpaidBills.map(b=>(
-                <div key={b.id} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-                  <div>
-                    <span style={{fontSize:11,background:DEPT_COLORS[b.department],color:C.white,borderRadius:10,padding:"1px 8px",marginRight:6}}>{b.department}</span>
-                    <span style={{fontSize:13,color:C.navy,fontWeight:600}}>{b.item}</span>
-                    {b.dueDate && <div style={{fontSize:11,color:C.danger}}>期限: {b.dueDate}</div>}
-                  </div>
-                  <span style={{fontWeight:800,color:C.danger}}>¥{fmt(b.amount)}</span>
-                </div>
-              ))}
-            </SectionCard>
-          )}
-
-          <SectionCard title="💰 出納帳（部門別収支）">
-            {DEPARTMENTS.map(d=>(
-              <div key={d} style={{padding:"8px 0",borderBottom:`1px solid ${C.border}`}}>
-                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                  <span style={{background:DEPT_COLORS[d],color:C.white,fontSize:11,borderRadius:10,padding:"2px 9px",fontWeight:700}}>{d}</span>
-                </div>
-                <div style={{display:"flex",gap:16,fontSize:13}}>
-                  <span style={{color:C.mint}}>入金 <strong>¥{fmt(ledgerByDept[d].in)}</strong></span>
-                  <span style={{color:C.danger}}>出金 <strong>¥{fmt(ledgerByDept[d].out)}</strong></span>
-                  <span style={{color:ledgerByDept[d].in-ledgerByDept[d].out>=0?C.mint:C.danger,fontWeight:800}}>
-                    収支 {ledgerByDept[d].in-ledgerByDept[d].out>=0?"+":""}{fmt(ledgerByDept[d].in-ledgerByDept[d].out)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </SectionCard>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ===================== 設定タブ =====================
-function SettingsTab({ banks, setBanks, deferred, setDeferred, billItems, setBillItems, setPurchases, setBills, setLedger, showToast }) {
-  const [nb,setNb] = useState("");
-  const [nd,setNd] = useState("");
-  const [nbi,setNbi] = useState({dept:"カフェ店舗",name:""});
-
-  return (
-    <div>
-      <SectionCard title="🏦 デビット銀行口座">
-        {banks.map((b,i)=><SettingRow key={i} label={b} onDelete={()=>setBanks(bs=>bs.filter((_,j)=>j!==i))} />)}
-        <AddRow value={nb} onChange={setNb} placeholder="銀行名を追加" onAdd={()=>{if(nb.trim()){setBanks(bs=>[...bs,nb.trim()]);setNb("");showToast("追加しました");}}} />
-      </SectionCard>
-
-      <SectionCard title="🔄 後払いサービス">
-        {deferred.map((d,i)=><SettingRow key={i} label={d} onDelete={()=>setDeferred(ds=>ds.filter((_,j)=>j!==i))} />)}
-        <AddRow value={nd} onChange={setNd} placeholder="サービス名を追加" onAdd={()=>{if(nd.trim()){setDeferred(ds=>[...ds,nd.trim()]);setNd("");showToast("追加しました");}}} />
-      </SectionCard>
-
-      <SectionCard title="📋 請求書項目（部門別）">
-        {DEPARTMENTS.map(dept=>(
-          <div key={dept} style={{marginBottom:14}}>
-            <div style={{fontSize:13,fontWeight:700,color:DEPT_COLORS[dept],marginBottom:6}}>{dept}</div>
-            {(billItems[dept]||[]).map((item,i)=><SettingRow key={i} label={item} onDelete={()=>setBillItems(bi=>({...bi,[dept]:(bi[dept]||[]).filter((_,j)=>j!==i)}))} />)}
-          </div>
-        ))}
-        <div style={{background:C.rose,borderRadius:10,padding:12,marginTop:6}}>
-          <div style={{fontSize:12,color:C.gray,marginBottom:8,fontWeight:600}}>追加する部門を選択</div>
-          <select value={nbi.dept} onChange={e=>setNbi(v=>({...v,dept:e.target.value}))} style={{...IS,marginBottom:8}}>{DEPARTMENTS.map(d=><option key={d}>{d}</option>)}</select>
-          <div style={{display:"flex",gap:8}}>
-            <input value={nbi.name} onChange={e=>setNbi(v=>({...v,name:e.target.value}))} placeholder="項目名（例：WiFi代）" style={{...IS,marginBottom:0,flex:1}} />
-            <button onClick={()=>{if(nbi.name.trim()){setBillItems(bi=>({...bi,[nbi.dept]:[...(bi[nbi.dept]||[]),nbi.name.trim()]}));setNbi(v=>({...v,name:""}));showToast("追加しました");}}} style={addBtn}>追加</button>
-          </div>
-        </div>
-      </SectionCard>
-
-      <SectionCard title="⚠️ データ管理">
-        <button onClick={()=>{if(window.confirm("購入記録を全削除しますか？")){setPurchases([]);showToast("削除しました","#bbb");}}} style={{...delBtn, borderColor:C.warn, color:C.warn, marginBottom:8}}>購入記録を全削除</button>
-        <button onClick={()=>{if(window.confirm("請求書を全削除しますか？")){setBills([]);showToast("削除しました","#bbb");}}}   style={{...delBtn, borderColor:C.danger, color:C.danger, marginBottom:8}}>請求書を全削除</button>
-        <button onClick={()=>{if(window.confirm("出納帳を全削除しますか？")){setLedger([]);showToast("削除しました","#bbb");}}}  style={{...delBtn, borderColor:C.primary, color:C.primary}}>出納帳を全削除</button>
-        <div style={{fontSize:11,color:"#ccc",marginTop:8}}>※ 削除したデータは復元できません</div>
-      </SectionCard>
-    </div>
-  );
-}
-
-// ===================== 共通コンポーネント =====================
-function Pill({ label, count, bg }) {
-  return <div style={{background:bg,borderRadius:16,padding:"3px 12px",fontSize:12,backdropFilter:"blur(4px)"}}><span style={{opacity:0.9}}>{label} </span><strong>{count}</strong></div>;
-}
-function Lbl({ children }) { return <div style={{fontSize:13,color:C.gray,fontWeight:700,marginBottom:4,letterSpacing:0.3}}>{children}</div>; }
-function SectionCard({ title, children }) {
-  return (
-    <div style={{background:C.white,borderRadius:14,padding:16,marginBottom:12,boxShadow:C.cardShadow}}>
-      <div style={{fontWeight:800,fontSize:14,color:C.navy,marginBottom:12,paddingBottom:8,borderBottom:`2px solid ${C.border}`}}>{title}</div>
-      {children}
-    </div>
-  );
-}
-function FormCard({ title, children }) {
-  return (
-    <div style={{background:C.white,borderRadius:16,padding:20,boxShadow:"0 4px 20px rgba(232,99,140,0.12)"}}>
-      <div style={{fontWeight:800,fontSize:16,color:C.navy,marginBottom:16,paddingBottom:10,borderBottom:`2px solid ${C.primaryLt}`}}>{title}</div>
-      {children}
-    </div>
-  );
-}
-function Empty({ text }) { return <div style={{textAlign:"center",color:"#ccc",padding:"52px 0",fontSize:15}}>{text}</div>; }
-function ScrollRow({ children, style }) { return <div style={{display:"flex",gap:7,overflowX:"auto",paddingBottom:4,...style}}>{children}</div>; }
-function Chip({ label, active, color, onClick }) {
-  return (
-    <button onClick={onClick} style={{
-      padding:"6px 14px", borderRadius:22, border:`1.5px solid ${active?color:C.border}`,
-      background: active ? color : C.white, color: active ? C.white : C.gray,
-      fontSize:12, cursor:"pointer", whiteSpace:"nowrap", fontWeight: active?700:400, flexShrink:0,
-      boxShadow: active ? `0 2px 10px ${color}44` : "none", transition:"all 0.2s",
-    }}>{label}</button>
-  );
-}
-function DeptSel({ value, onChange }) {
-  return (
-    <div style={{display:"flex",gap:7,marginBottom:14,flexWrap:"wrap"}}>
-      {DEPARTMENTS.map(d=>(
-        <button key={d} onClick={()=>onChange(d)} style={{
-          flex:1, minWidth:90, padding:"10px 6px", borderRadius:12,
-          border:`2px solid ${value===d?DEPT_COLORS[d]:C.border}`,
-          background: value===d?DEPT_BG[d]:C.white,
-          color: value===d?DEPT_COLORS[d]:C.gray,
-          fontWeight:value===d?800:400, cursor:"pointer", fontSize:13,
-          boxShadow: value===d?`0 2px 10px ${DEPT_COLORS[d]}33`:"none",
-          transition:"all 0.2s",
-        }}>{d}</button>
-      ))}
-    </div>
-  );
-}
-function TaxSel({ value, onChange }) {
-  return (
-    <div style={{display:"flex",gap:7,marginBottom:14}}>
-      {TAX_OPTIONS.map(opt=>(
-        <button key={opt.value} onClick={()=>onChange(opt.value)} style={{
-          flex:1, padding:"9px 0", borderRadius:12,
-          border:`2px solid ${value==opt.value?C.primary:C.border}`,
-          background: value==opt.value?C.primaryLt:C.white,
-          color: value==opt.value?C.primary:C.gray,
-          fontWeight:value==opt.value?800:400, cursor:"pointer", fontSize:14,
-          boxShadow: value==opt.value?`0 2px 10px ${C.primary}33`:"none",
-          transition:"all 0.2s",
-        }}>{opt.label}</button>
-      ))}
-    </div>
-  );
-}
-function PaySel({ value, onChange }) {
-  return (
-    <div style={{display:"flex",gap:7,marginBottom:10}}>
-      {PAYMENT_TYPES.map(pt=>(
-        <button key={pt} onClick={()=>onChange(pt)} style={{
-          flex:1, padding:"9px 0", borderRadius:12,
-          border:`2px solid ${value===pt?C.primary:C.border}`,
-          background: value===pt?C.primaryLt:C.white,
-          color: value===pt?C.primary:C.gray,
-          fontWeight:value===pt?800:400, cursor:"pointer", fontSize:14,
-          boxShadow: value===pt?`0 2px 10px ${C.primary}33`:"none",
-          transition:"all 0.2s",
-        }}>{pt}</button>
-      ))}
-    </div>
-  );
-}
-function TaxPrev({ amount, rate }) {
-  if (!amount) return null;
-  const { net, tax } = calcTax(amount, parseFloat(rate));
-  return (
-    <div style={{fontSize:12,color:C.primary,marginTop:-8,marginBottom:10,background:C.primaryLt,borderRadius:8,padding:"6px 12px",fontWeight:600}}>
-      {parseFloat(rate)===0?"非課税":`税抜: ¥${fmt(net)}　消費税: ¥${fmt(tax)}`}
-    </div>
-  );
-}
-function BankSel({ form, onChange, banks }) {
-  return (
-    <>
-      <Lbl>銀行口座</Lbl>
-      <select name="bank" value={form.bank} onChange={onChange} style={IS}>
-        <option value="">選択してください</option>
-        {banks.map(b=><option key={b}>{b}</option>)}
-        <option value="__custom__">＋ その他（直接入力）</option>
-      </select>
-      {form.bank==="__custom__" && <input type="text" name="customBank" value={form.customBank} onChange={onChange} placeholder="銀行名" style={{...IS,marginTop:6}} />}
-    </>
-  );
-}
-function DefSel({ form, onChange, deferred }) {
-  return (
-    <>
-      <Lbl>後払いサービス</Lbl>
-      <select name="deferredService" value={form.deferredService} onChange={onChange} style={IS}>
-        <option value="">選択してください</option>
-        {deferred.map(d=><option key={d}>{d}</option>)}
-        <option value="__custom__">＋ その他（直接入力）</option>
-      </select>
-      {form.deferredService==="__custom__" && <input type="text" name="customDeferred" value={form.customDeferred} onChange={onChange} placeholder="サービス名" style={{...IS,marginTop:6}} />}
-      <Lbl>入金予定日</Lbl>
-      <input type="date" name="paymentDueDate" value={form.paymentDueDate} onChange={onChange} style={IS} />
-    </>
-  );
-}
-function ChkToggle({ label, name, checked, onChange, color }) {
-  return (
-    <label style={{display:"flex",alignItems:"center",gap:7,cursor:"pointer",fontSize:13,
-      background:checked?color+"18":C.rose, borderRadius:12, padding:"9px 12px", flex:1,
-      border:`2px solid ${checked?color:C.border}`, transition:"all 0.2s",
-    }}>
-      <input type="checkbox" name={name} checked={checked} onChange={onChange} style={{accentColor:color,width:16,height:16}} />
-      <span style={{color:checked?color:C.gray, fontWeight:checked?800:400}}>{label}</span>
-    </label>
-  );
-}
-function MiniToggle({ label, done, onClick, ac }) {
-  return (
-    <button onClick={onClick} style={{
-      padding:"6px 12px", borderRadius:20, fontSize:12, cursor:"pointer", fontWeight:done?800:400,
-      border:`1.5px solid ${done?ac:C.border}`,
-      background: done ? ac : C.white,
-      color: done ? C.white : C.gray,
-      boxShadow: done ? `0 2px 8px ${ac}44` : "none",
-      transition:"all 0.2s",
-    }}>{done?"✓ ":""}{label}{done?"済":"未"}</button>
-  );
-}
-function PillBtn({ children, onClick, bg, color, style }) {
-  return (
-    <button onClick={onClick} style={{padding:"6px 12px",borderRadius:20,border:"none",background:bg,color,fontSize:12,cursor:"pointer",fontWeight:600,...style}}>
-      {children}
-    </button>
-  );
-}
-function FormBtns({ onCancel, onSubmit, isEdit }) {
-  return (
-    <div style={{display:"flex",gap:10,marginTop:8}}>
-      <button onClick={onCancel} style={{flex:1,padding:13,borderRadius:12,border:`2px solid ${C.border}`,background:C.white,color:C.gray,cursor:"pointer",fontSize:15,fontWeight:600}}>キャンセル</button>
-      <button onClick={onSubmit} style={{flex:2,padding:13,borderRadius:12,border:"none",background:`linear-gradient(135deg,${C.primaryDk},${C.primary})`,color:C.white,fontWeight:800,cursor:"pointer",fontSize:15,boxShadow:`0 4px 14px ${C.primary}55`}}>{isEdit?"更新する":"追加する ✨"}</button>
-    </div>
-  );
-}
-function Fab({ onClick }) {
-  return (
-    <button onClick={onClick} style={{position:"fixed",bottom:22,right:18,width:56,height:56,borderRadius:"50%",
-      background:`linear-gradient(135deg,${C.primaryDk},${C.primary})`,
-      color:C.white,fontSize:28,border:"none",
-      boxShadow:`0 4px 20px ${C.primary}66`,cursor:"pointer",
-      display:"flex",alignItems:"center",justifyContent:"center",zIndex:50,
-      transition:"transform 0.15s",
-    }}>＋</button>
-  );
-}
-function Confirm({ open, onCancel, onConfirm }) {
-  if (!open) return null;
-  return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100}}>
-      <div style={{background:C.white,borderRadius:20,padding:28,maxWidth:300,width:"90%",textAlign:"center",boxShadow:"0 8px 40px rgba(0,0,0,0.15)"}}>
-        <div style={{fontSize:17,fontWeight:800,color:C.navy,marginBottom:8}}>削除しますか？</div>
-        <div style={{fontSize:13,color:C.gray,marginBottom:22}}>元に戻せません</div>
-        <div style={{display:"flex",gap:10}}>
-          <button onClick={onCancel}  style={{flex:1,padding:11,borderRadius:12,border:`2px solid ${C.border}`,background:C.white,color:C.gray,cursor:"pointer",fontWeight:600}}>キャンセル</button>
-          <button onClick={onConfirm} style={{flex:1,padding:11,borderRadius:12,border:"none",background:C.danger,color:C.white,fontWeight:800,cursor:"pointer",boxShadow:`0 3px 12px ${C.danger}44`}}>削除</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-function SettingRow({ label, onDelete }) {
-  return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.rose,borderRadius:10,padding:"9px 13px",marginBottom:6,fontSize:14,color:C.navy}}>
-      {label}
-      <button onClick={onDelete} style={{background:"none",border:"none",color:C.danger,cursor:"pointer",fontSize:18,lineHeight:1,padding:"0 4px"}}>×</button>
-    </div>
-  );
-}
-function AddRow({ value, onChange, placeholder, onAdd }) {
-  return (
-    <div style={{display:"flex",gap:8,marginTop:8}}>
-      <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={{...IS,marginBottom:0,flex:1}} />
-      <button onClick={onAdd} style={addBtn}>追加</button>
-    </div>
-  );
-}
-
-const IS = { width:"100%", boxSizing:"border-box", padding:"11px 13px", borderRadius:10, border:`2px solid #f0d8e4`, fontSize:15, marginBottom:14, background:"#fdfafc", outline:"none", color:"#3a2a3e" };
-const addBtn = { padding:"0 16px", borderRadius:10, background:`linear-gradient(135deg,#c94b74,#e8638c)`, color:"#fff", border:"none", cursor:"pointer", fontSize:13, fontWeight:700, whiteSpace:"nowrap", boxShadow:"0 2px 10px rgba(232,99,140,0.35)" };
-const delBtn = { width:"100%", padding:11, borderRadius:10, background:"#fff", fontWeight:700, cursor:"pointer", fontSize:13, border:"1.5px solid" };
-const csvBtn = { marginLeft:"auto", padding:"6px 14px", borderRadius:22, border:"none", background:`linear-gradient(135deg,#3dba8c,#2da57a)`, color:"#fff", fontSize:12, cursor:"pointer", whiteSpace:"nowrap", fontWeight:700, boxShadow:"0 2px 8px rgba(61,186,140,0.35)", flexShrink:0 };
-
-// ===================== 出納帳タブ =====================
-function LedgerTab({ ledger, setLedger, carryover, setCarryover, banks, showToast }) {
-  const [mode, setMode]       = useState("list");
-  const [form, setForm]       = useState(EMPTY_LEDGER);
-  const [editId, setEditId]   = useState(null);
-  const [filterDept, setFD]   = useState("カフェ店舗");
-  const [confirmDel, setCD]   = useState(null);
-  const [showCarryover, setSC] = useState(false);
-  const [coForm, setCoForm]   = useState({...carryover});
-
-  function hc(e) { const{name,value,type,checked}=e.target; setForm(f=>({...f,[name]:type==="checkbox"?checked:value})); }
-
-  function handleSubmit() {
-    if (!form.amount||!form.description.trim()) { showToast("金額と摘要は必須です",C.danger); return; }
-    if (editId!==null) {
-      setLedger(ls=>ls.map(l=>l.id===editId?{...form,id:editId}:l));
-      showToast("✓ 更新しました"); setEditId(null);
-    } else {
-      setLedger(ls=>[{...form,id:Date.now()},...ls]);
-      showToast("✓ 追加しました");
+  function submitReport() {
+    const staff = document.getElementById('staff').value.trim();
+    if (!staff) {
+      alert('担当者名を入力してください。');
+      document.getElementById('staff').focus();
+      return;
     }
-    setForm({...EMPTY_LEDGER,date:form.date,department:form.department}); setMode("list");
+
+    const text = buildText();
+    document.getElementById('preview-text').textContent = text;
+    document.getElementById('preview-wrap').style.display = 'block';
+
+    const now = new Date();
+    document.getElementById('modal-time').textContent =
+      `作成日時：${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('preview-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function startEdit(r) { setForm({...r}); setEditId(r.id); setMode("add"); }
-  function doDelete(id) { setLedger(ls=>ls.filter(l=>l.id!==id)); setCD(null); showToast("削除しました","#aaa"); }
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('preview-wrap').scrollIntoView({ behavior: 'smooth' });
+  }
 
-  // 部門別フィルター・日付順ソート
-  const deptLedger = ledger.filter(l=>l.department===filterDept).sort((a,b)=>a.date.localeCompare(b.date));
-
-  // 通算残高計算
-  let running = parseFloat(carryover[filterDept])||0;
-  const withBalance = deptLedger.map(l => {
-    const amt = parseFloat(l.amount)||0;
-    if (l.type==="入金") running += amt;
-    else running -= amt;
-    return {...l, balance: running};
-  });
-  const currentBalance = withBalance.length>0 ? withBalance[withBalance.length-1].balance : (parseFloat(carryover[filterDept])||0);
-
-  // 今月の収支
-  const thisMonth = new Date().toISOString().slice(0,7);
-  const monthIn  = deptLedger.filter(l=>l.date.startsWith(thisMonth)&&l.type==="入金").reduce((s,l)=>s+(parseFloat(l.amount)||0),0);
-  const monthOut = deptLedger.filter(l=>l.date.startsWith(thisMonth)&&l.type==="出金").reduce((s,l)=>s+(parseFloat(l.amount)||0),0);
-  const unpaid   = ledger.filter(l=>l.type==="入金"&&!l.received&&l.department===filterDept).length;
-
-  if (mode==="add") return (
-    <LedgerForm form={form} editId={editId} onChange={hc} onSubmit={handleSubmit}
-      onCancel={()=>{setMode("list");setEditId(null);setForm(EMPTY_LEDGER);}}
-      banks={banks} setForm={setForm} />
-  );
-
-  return (
-    <>
-      {/* 部門タブ */}
-      <ScrollRow>
-        {DEPARTMENTS.map(d=>(
-          <Chip key={d} label={d} active={filterDept===d} color={DEPT_COLORS[d]} onClick={()=>setFD(d)} />
-        ))}
-      </ScrollRow>
-
-      {/* 残高サマリー */}
-      <div style={{background:`linear-gradient(135deg,${DEPT_COLORS[filterDept]},${DEPT_COLORS[filterDept]}cc)`,borderRadius:16,padding:"16px 18px",marginTop:10,marginBottom:12,color:C.white,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:-20,right:-20,width:90,height:90,borderRadius:"50%",background:"rgba(255,255,255,0.1)"}} />
-        <div style={{fontSize:12,opacity:0.85,marginBottom:2}}>{filterDept} 現在残高</div>
-        <div style={{fontSize:28,fontWeight:900}}>¥{fmt(currentBalance)}</div>
-        <div style={{display:"flex",gap:16,marginTop:8,fontSize:12}}>
-          <span>今月入金 <strong>¥{fmt(monthIn)}</strong></span>
-          <span>今月出金 <strong>¥{fmt(monthOut)}</strong></span>
-          {unpaid>0 && <span style={{background:"rgba(255,255,255,0.2)",borderRadius:10,padding:"1px 8px"}}>未入金 {unpaid}件</span>}
-        </div>
-      </div>
-
-      {/* 繰越残高設定 */}
-      <button onClick={()=>setSC(!showCarryover)} style={{width:"100%",padding:"8px",borderRadius:10,border:`1.5px dashed ${C.border}`,background:"transparent",color:C.gray,fontSize:13,cursor:"pointer",marginBottom:10}}>
-        ⚙️ 繰越残高を設定する
-      </button>
-      {showCarryover && (
-        <div style={{background:C.white,borderRadius:12,padding:14,marginBottom:12,boxShadow:C.cardShadow}}>
-          <div style={{fontSize:13,fontWeight:700,color:C.navy,marginBottom:10}}>繰越残高（部門別）</div>
-          {DEPARTMENTS.map(d=>(
-            <div key={d} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-              <span style={{fontSize:13,color:DEPT_COLORS[d],fontWeight:700,minWidth:120}}>{d}</span>
-              <input type="number" value={coForm[d]||""} onChange={e=>setCoForm(f=>({...f,[d]:e.target.value}))}
-                placeholder="0" style={{...IS,marginBottom:0,flex:1}} />
-            </div>
-          ))}
-          <button onClick={()=>{setCarryover(Object.fromEntries(DEPARTMENTS.map(d=>[d,parseFloat(coForm[d])||0])));setSC(false);showToast("繰越残高を保存しました");}}
-            style={{...addBtn,width:"100%",padding:10,marginTop:4}}>保存する</button>
-        </div>
-      )}
-
-      {/* 一覧（新しい順に上に表示） */}
-      {[...withBalance].reverse().length===0 ? <Empty text="記録がありません" /> :
-        [...withBalance].reverse().map(l=>(
-          <LedgerCard key={l.id} l={l}
-            onEdit={()=>startEdit(l)}
-            onToggleReceived={()=>setLedger(ls=>ls.map(r=>r.id===l.id?{...r,received:!r.received}:r))}
-            onDelete={()=>setCD(l.id)} />
-        ))
-      }
-
-      <Fab onClick={()=>{setForm({...EMPTY_LEDGER,department:filterDept});setEditId(null);setMode("add");}} />
-      <Confirm open={confirmDel} onCancel={()=>setCD(null)} onConfirm={()=>doDelete(confirmDel)} />
-    </>
-  );
-}
-
-function LedgerForm({ form, editId, onChange, onSubmit, onCancel, banks, setForm }) {
-  return (
-    <FormCard title={editId!==null?"✏️ 出納帳を編集":"💰 新規記録"}>
-      <Lbl>日付</Lbl>
-      <input type="date" name="date" value={form.date} onChange={onChange} style={IS} />
-
-      <Lbl>部門 *</Lbl>
-      <DeptSel value={form.department} onChange={v=>setForm(f=>({...f,department:v}))} />
-
-      <Lbl>種別 *</Lbl>
-      <div style={{display:"flex",gap:7,marginBottom:14}}>
-        {["入金","出金"].map(t=>(
-          <button key={t} onClick={()=>setForm(f=>({...f,type:t}))} style={{
-            flex:1, padding:"10px 0", borderRadius:12, cursor:"pointer", fontSize:15, fontWeight:700,
-            border:`2px solid ${form.type===t?(t==="入金"?C.mint:C.danger):C.border}`,
-            background: form.type===t?(t==="入金"?C.mintLt:C.primaryLt):C.white,
-            color: form.type===t?(t==="入金"?C.mint:C.danger):C.gray,
-            boxShadow: form.type===t?`0 2px 10px ${t==="入金"?C.mint:C.danger}33`:"none",
-          }}>{t==="入金"?"💚 入金":"💸 出金"}</button>
-        ))}
-      </div>
-
-      <Lbl>金額 *</Lbl>
-      <input type="number" name="amount" value={form.amount} onChange={onChange} placeholder="例：50000" style={IS} />
-
-      <Lbl>摘要（内容） *</Lbl>
-      <input type="text" name="description" value={form.description} onChange={onChange} placeholder="例：ケーキ缶売上、仕入れ代金" style={IS} />
-
-      <Lbl>支払種別</Lbl>
-      <PaySel value={form.paymentType} onChange={v=>setForm(f=>({...f,paymentType:v}))} />
-      {form.paymentType==="デビット" && (
-        <>
-          <Lbl>銀行口座</Lbl>
-          <select name="bank" value={form.bank} onChange={onChange} style={IS}>
-            <option value="">選択してください</option>
-            {banks.map(b=><option key={b}>{b}</option>)}
-          </select>
-        </>
-      )}
-
-      {form.type==="入金" && (
-        <div style={{display:"flex",gap:10,marginBottom:14}}>
-          <ChkToggle label="入金済み" name="received" checked={form.received} onChange={onChange} color={C.mint} />
-        </div>
-      )}
-      {form.type==="入金" && !form.received && (
-        <>
-          <Lbl>入金予定日</Lbl>
-          <input type="date" name="expectedDate" value={form.expectedDate} onChange={onChange} style={IS} />
-        </>
-      )}
-
-      <Lbl>メモ</Lbl>
-      <textarea name="memo" value={form.memo} onChange={onChange} rows={2} placeholder="備考など" style={{...IS,resize:"vertical"}} />
-      <FormBtns onCancel={onCancel} onSubmit={onSubmit} isEdit={editId!==null} />
-    </FormCard>
-  );
-}
-
-function LedgerCard({ l, onEdit, onToggleReceived, onDelete }) {
-  const isIncome = l.type==="入金";
-  const isPending = isIncome && !l.received;
-  const isOverdue = isPending && l.expectedDate && l.expectedDate < new Date().toISOString().slice(0,10);
-  const leftColor = isIncome ? (l.received ? C.mint : isOverdue ? C.danger : C.warn) : C.primary;
-  const dc = DEPT_COLORS[l.department]||C.primary;
-
-  return (
-    <div style={{background:C.white,borderRadius:14,marginBottom:9,padding:14,boxShadow:C.cardShadow,borderLeft:`4px solid ${leftColor}`}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-        <div style={{flex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
-            <span style={{background:isIncome?C.mint:C.primary,color:C.white,fontSize:10,borderRadius:10,padding:"2px 8px",fontWeight:700}}>
-              {isIncome?"💚 入金":"💸 出金"}
-            </span>
-            <span style={{fontWeight:700,fontSize:15,color:C.navy}}>{l.description}</span>
-          </div>
-          <div style={{fontSize:12,color:C.gray}}>{l.date}　{l.paymentType}{l.bank?`（${l.bank}）`:""}</div>
-          {isPending && l.expectedDate && <div style={{fontSize:12,color:isOverdue?C.danger:C.warn,marginTop:2}}>📅 入金予定: {l.expectedDate}{isOverdue?" ⚠️期限超過":""}</div>}
-          {isIncome && l.received && <div style={{fontSize:12,color:C.mint,marginTop:2}}>✓ 入金済み</div>}
-          {l.memo && <div style={{fontSize:12,color:C.gray,marginTop:2,fontStyle:"italic"}}>💬 {l.memo}</div>}
-        </div>
-        <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-          <div style={{fontWeight:800,fontSize:17,color:isIncome?C.mint:C.danger}}>{isIncome?"+":"-"}¥{fmt(l.amount)}</div>
-          <div style={{fontSize:11,color:C.gray,marginTop:2}}>残高 ¥{fmt(l.balance)}</div>
-        </div>
-      </div>
-      <div style={{display:"flex",gap:6,marginTop:9,flexWrap:"wrap"}}>
-        {isIncome && (
-          <button onClick={onToggleReceived} style={{padding:"5px 12px",borderRadius:20,fontSize:12,cursor:"pointer",fontWeight:700,border:"none",
-            background:l.received?C.mint:C.primaryLt,color:l.received?C.white:C.primary,
-            boxShadow:l.received?`0 2px 8px ${C.mint}44`:`0 2px 8px ${C.primary}22`}}>
-            {l.received?"✓ 入金済み":"未入金 → 入金済みに"}
-          </button>
-        )}
-        <PillBtn onClick={onEdit} bg="#f9f0f5" color={C.gray}>✏️ 編集</PillBtn>
-        <PillBtn onClick={onDelete} bg="#fff0f4" color={C.danger} style={{marginLeft:"auto"}}>🗑</PillBtn>
-      </div>
-    </div>
-  );
-}
-
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  function copyText() {
+    const text = document.getElementById('preview-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✅ コピーしました！';
+      setTimeout(() => btn.innerHTML = '📋 テキストをコピー', 2000);
+    });
+  }
+</script>
 </body>
 </html>
