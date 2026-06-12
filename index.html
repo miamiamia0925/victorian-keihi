@@ -36,7 +36,7 @@
   /* ── Header ── */
   header {
     text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
   }
   .logo-line {
     font-family: 'Noto Serif JP', serif;
@@ -61,6 +61,35 @@
     content: ''; flex: 1; height: 1px; background: var(--gold);
   }
   .header-rule span { color: var(--gold); font-size: 14px; }
+
+  /* ── Config banner ── */
+  .config-banner {
+    background: #FBF0DD;
+    border: 1px solid var(--gold-lt);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--brown-md);
+    margin-bottom: 16px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tab {
+    flex: 1; padding: 12px 8px; text-align: center;
+    background: var(--ivory); border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px; letter-spacing: 0.08em; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tab.active {
+    background: var(--brown); color: var(--ivory); border-color: var(--brown);
+  }
 
   /* ── Card ── */
   .card {
@@ -94,6 +123,9 @@
     margin-top: 14px;
   }
   label:first-of-type { margin-top: 0; }
+  .hint {
+    font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6;
+  }
 
   input[type="text"],
   input[type="number"],
@@ -260,6 +292,148 @@
     cursor: pointer; transition: background 0.15s;
   }
   .copy-btn:hover { background: rgba(184,154,92,0.08); }
+
+  /* ── History tab ── */
+  .history-summary {
+    display: flex; justify-content: space-around;
+    background: var(--ivory); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 8px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .summary-item { text-align: center; }
+  .summary-value {
+    font-family: 'Noto Serif JP', serif; font-size: 17px; color: var(--brown); font-weight: 600;
+  }
+  .summary-label { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: 0.05em; }
+
+  .history-loading, .empty-state {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+    font-size: 13px; line-height: 1.8;
+  }
+
+  .event-group {
+    background: var(--ivory); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .event-header {
+    padding: 16px 18px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    background: linear-gradient(135deg, var(--brown) 0%, var(--brown-md) 100%);
+    color: var(--ivory);
+    gap: 10px;
+  }
+  .event-header .name {
+    font-family: 'Noto Serif JP', serif; font-size: 15px; letter-spacing: 0.05em;
+    word-break: break-all;
+  }
+  .event-header .meta {
+    font-size: 11px; opacity: 0.8; margin-top: 4px; letter-spacing: 0.05em;
+  }
+  .event-header .right { text-align: right; flex-shrink: 0; }
+  .event-header .total { font-family: 'Noto Serif JP', serif; font-size: 15px; font-weight: 600; }
+  .event-header .arrow { font-size: 12px; margin-top: 4px; transition: transform 0.2s; opacity: 0.8; }
+  .event-header.open .arrow { transform: rotate(180deg); }
+
+  .event-body { display: none; padding: 4px 16px 6px; }
+  .event-body.open { display: block; }
+
+  .entry { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .entry:last-child { border-bottom: none; }
+  .entry-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .entry-date {
+    font-family: 'Noto Serif JP', serif; font-size: 13px; letter-spacing: 0.05em; color: var(--brown);
+  }
+  .entry-amount { font-size: 15px; font-weight: 600; color: var(--brown); }
+  .entry-meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .entry-report { font-size: 13px; line-height: 1.7; color: var(--ink); white-space: pre-wrap; }
+  .entry-ship {
+    font-size: 12px; color: var(--brown-lt); margin-top: 6px;
+    background: rgba(184,154,92,0.08); border-radius: 6px; padding: 8px 10px; line-height: 1.7;
+  }
+
+  .refresh-btn {
+    margin-top: 4px;
+  }
+
+  /* イベント選択ボタン */
+  .event-picker-btn {
+    width: 100%; display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 13px; border: 1px solid var(--border); border-radius: 6px;
+    background: #FFFFFF; font-size: 15px; color: var(--ink); cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif; text-align: left;
+  }
+  .event-picker-btn:active { border-color: var(--gold); }
+  .picker-arrow { color: var(--muted); font-size: 12px; }
+
+  /* イベント選択パネル */
+  .picker-panel {
+    background: var(--ivory); border: 1px solid var(--border); border-radius: 12px;
+    width: 92%; max-width: 380px; max-height: 78vh;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(44,31,20,0.25);
+    animation: popIn 0.2s ease;
+  }
+  .picker-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 18px; border-bottom: 1px solid var(--border);
+    font-family: 'Noto Serif JP', serif; font-size: 14px; color: var(--brown); letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+  .picker-close {
+    background: none; border: none; font-size: 22px; color: var(--muted);
+    cursor: pointer; line-height: 1; padding: 0 4px;
+  }
+  .picker-recent {
+    padding: 12px 18px 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    flex-shrink: 0;
+  }
+  .recent-label {
+    font-size: 11px; color: var(--muted); letter-spacing: 0.1em; width: 100%; margin-bottom: 2px;
+  }
+  .recent-chip {
+    padding: 7px 14px; border: 1px solid var(--gold-lt); border-radius: 16px;
+    font-size: 12px; color: var(--brown-lt); background: rgba(184,154,92,0.08); cursor: pointer;
+  }
+  .recent-chip:active { background: rgba(184,154,92,0.2); }
+  .event-search {
+    margin: 12px 18px; padding: 10px 13px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 14px; background: #FFFFFF; flex-shrink: 0;
+  }
+  .picker-list { overflow-y: auto; flex: 1; padding: 0 8px 14px; -webkit-overflow-scrolling: touch; }
+  .picker-item {
+    padding: 13px 14px; border-radius: 6px; font-size: 14px; color: var(--ink); cursor: pointer;
+  }
+  .picker-item:active { background: rgba(184,154,92,0.15); }
+  .picker-item.selected { background: var(--brown); color: var(--ivory); }
+  .picker-empty {
+    padding: 30px 16px; text-align: center; color: var(--muted); font-size: 13px; line-height: 1.7;
+  }
+
+  .lock-screen {
+    background: var(--ivory); border: 1px solid var(--border);
+    border-radius: 10px; padding: 48px 24px; text-align: center;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .lock-icon { font-size: 36px; margin-bottom: 14px; }
+  .lock-title {
+    font-family: 'Noto Serif JP', serif; font-size: 14px; color: var(--brown);
+    letter-spacing: 0.05em; margin-bottom: 22px; line-height: 1.8;
+  }
+  .pin-input {
+    text-align: center; font-size: 24px; letter-spacing: 0.5em;
+    max-width: 180px; margin: 0 auto 16px; display: block;
+  }
+  .lock-btn { max-width: 180px; margin: 0 auto; }
+  .pin-error { color: var(--red); font-size: 12px; margin-top: 14px; }
+  .lock-again {
+    margin-top: 10px; width: 100%; padding: 10px;
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 12px; color: var(--muted); cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -270,72 +444,126 @@
   <div class="header-rule"><span>✦</span></div>
 </header>
 
-<!-- 担当者 & 出勤時間 -->
-<div class="card">
-  <p class="card-title">担当者 / 勤務時間</p>
+<div class="config-banner" id="config-banner" style="display:none;">
+  ⚠️ 記録の保存先がまだ設定されていません。<br>
+  このまま使うとプレビューは作れますが、記録には残りません。設定方法はあみあさんが受け取った手順をご確認ください。
+</div>
 
-  <label>担当者名</label>
-  <input type="text" id="staff" placeholder="例：山田 花子">
+<div class="tabs">
+  <button class="tab active" data-tab="input" onclick="switchTab('input')">📝 報告する</button>
+  <button class="tab" data-tab="history" onclick="switchTab('history')">📖 記録を見る</button>
+</div>
 
-  <label>出勤時間</label>
-  <div class="time-row">
-    <input type="time" id="time-from" value="11:30">
-    <span class="time-sep">〜</span>
-    <input type="time" id="time-to" value="18:00">
+<!-- ============ 入力タブ ============ -->
+<div id="tab-input">
+
+  <div class="card">
+    <p class="card-title">イベント / 営業</p>
+    <label>イベント名</label>
+    <button type="button" class="event-picker-btn" id="event-picker-btn" onclick="openEventPicker()">
+      <span id="event-picker-label">通常営業</span>
+      <span class="picker-arrow">▾</span>
+    </button>
+    <input type="hidden" id="event-name" value="通常営業">
+    <p class="hint">一覧にないイベントは、スプレッドシートの「イベント一覧」シートに追加してください。</p>
   </div>
-</div>
 
-<!-- 売上 -->
-<div class="card">
-  <p class="card-title">売上報告</p>
+  <div class="card">
+    <p class="card-title">担当者 / 勤務時間</p>
 
-  <label>売上金額（円）</label>
-  <div class="amount-wrap">
-    <span class="amount-prefix">¥</span>
-    <input type="number" id="sales" placeholder="0" min="0" step="1">
-  </div>
-</div>
+    <label>担当者名</label>
+    <input type="text" id="staff" placeholder="例：山田 花子">
 
-<!-- 今日の報告 -->
-<div class="card">
-  <p class="card-title">今日の報告</p>
-
-  <label>報告内容</label>
-  <textarea class="report-area" id="report" placeholder="接客状況・商品の反応・気づいたこと など&#10;自由にご記入ください"></textarea>
-</div>
-
-<!-- 追加発送依頼 -->
-<div class="card">
-  <p class="card-title">追加発送依頼</p>
-
-  <div class="ship-list" id="ship-list">
-    <div class="ship-item">
-      <input type="text" placeholder="商品名（例：ケーキ缶 抹茶）">
-      <input type="number" placeholder="0" min="0" style="width:64px;text-align:center;">
-      <span class="ship-unit">個</span>
-      <button class="btn-remove" onclick="removeItem(this)" title="削除">×</button>
+    <label>出勤時間</label>
+    <div class="time-row">
+      <input type="time" id="time-from" value="11:30">
+      <span class="time-sep">〜</span>
+      <input type="time" id="time-to" value="18:00">
     </div>
   </div>
 
-  <button class="btn-add" onclick="addItem()">＋ 商品を追加</button>
+  <div class="card">
+    <p class="card-title">売上報告</p>
+
+    <label>売上金額（円）</label>
+    <div class="amount-wrap">
+      <span class="amount-prefix">¥</span>
+      <input type="number" id="sales" placeholder="0" min="0" step="1">
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">今日の報告</p>
+
+    <label>報告内容</label>
+    <textarea class="report-area" id="report" placeholder="接客状況・商品の反応・気づいたこと など&#10;自由にご記入ください"></textarea>
+  </div>
+
+  <div class="card">
+    <p class="card-title">追加発送依頼</p>
+
+    <div class="ship-list" id="ship-list">
+      <div class="ship-item">
+        <input type="text" placeholder="商品名（例：ケーキ缶 抹茶）">
+        <input type="number" placeholder="0" min="0" style="width:64px;text-align:center;">
+        <span class="ship-unit">個</span>
+        <button class="btn-remove" onclick="removeItem(this)" title="削除">×</button>
+      </div>
+    </div>
+
+    <button class="btn-add" onclick="addItem()">＋ 商品を追加</button>
+  </div>
+
+  <button class="btn-submit" onclick="submitReport()">記録する</button>
+
+  <div id="preview-wrap">
+    <span class="preview-label">REPORT PREVIEW</span>
+    <div id="preview-text"></div>
+    <button class="copy-btn" onclick="copyText()">📋 テキストをコピー</button>
+  </div>
+
 </div>
 
-<!-- 送信ボタン -->
-<button class="btn-submit" onclick="submitReport()">日報を完成させる</button>
+<!-- ============ 記録タブ ============ -->
+<div id="tab-history" style="display:none;">
 
-<!-- プレビュー -->
-<div id="preview-wrap">
-  <span class="preview-label">REPORT PREVIEW</span>
-  <div id="preview-text"></div>
-  <button class="copy-btn" onclick="copyText()">📋 テキストをコピー</button>
+  <div class="lock-screen" id="lock-screen">
+    <div class="lock-icon">🔒</div>
+    <p class="lock-title">記録を見るには<br>暗証番号を入力してください</p>
+    <input type="password" id="pin-input" inputmode="numeric" maxlength="8" placeholder="暗証番号" class="pin-input" onkeydown="if(event.key==='Enter') checkPin()">
+    <button class="btn-submit lock-btn" onclick="checkPin()">開く</button>
+    <p class="pin-error" id="pin-error" style="display:none;">暗証番号が正しくありません</p>
+  </div>
+
+  <div id="history-unlocked" style="display:none;">
+    <div class="history-summary" id="history-summary" style="display:none;"></div>
+    <div class="history-loading" id="history-loading">読み込み中…</div>
+    <div id="history-content"></div>
+    <button class="btn-add refresh-btn" onclick="loadHistory()">🔄 最新の記録を取得</button>
+    <button class="lock-again" onclick="lockHistory()">🔒 ロックする</button>
+  </div>
+
+</div>
+
+<!-- イベント選択 -->
+<div class="overlay" id="event-picker-overlay">
+  <div class="picker-panel">
+    <div class="picker-header">
+      <span>イベントを選択</span>
+      <button class="picker-close" onclick="closeEventPicker()">×</button>
+    </div>
+    <div class="picker-recent" id="picker-recent"></div>
+    <input type="text" id="event-search" class="event-search" placeholder="🔍 イベント名で検索" oninput="filterEventList()">
+    <div class="picker-list" id="picker-list"></div>
+  </div>
 </div>
 
 <!-- 完了モーダル -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal-icon">✅</div>
-    <h2>日報を作成しました</h2>
-    <p>下のプレビューからテキストをコピーして、LINEやメールで送信してください。</p>
+    <h2>記録しました</h2>
+    <p>下のプレビューからテキストをコピーして、LINEやメールで送ることもできます。<br>「記録を見る」タブからいつでも見返せます。</p>
     <p class="modal-time" id="modal-time"></p>
     <br>
     <button class="btn-modal" onclick="closeModal()">確認する</button>
@@ -343,6 +571,101 @@
 </div>
 
 <script>
+  /* ════════════════════════════════════════════════════
+     ▼▼▼ ここにGoogle Apps ScriptのウェブアプリURLを貼ってください ▼▼▼
+     例: https://script.google.com/macros/s/AKfycb.../exec
+  ════════════════════════════════════════════════════ */
+  const SCRIPT_URL = "ここにURLを貼り替えてください";
+  /* ════════════════════════════════════════════════════ */
+
+  let historyLoaded = false;
+  let historyUnlocked = false;
+  let currentPin = null;
+  let allEvents = ['通常営業'];
+  const RECENT_EVENTS_KEY = 'victorianCafe_recentEvents';
+
+  function isConfigured() {
+    return SCRIPT_URL.indexOf('http') === 0;
+  }
+
+  /* ---------- タブ切り替え ---------- */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById('tab-input').style.display = (tab === 'input') ? 'block' : 'none';
+    document.getElementById('tab-history').style.display = (tab === 'history') ? 'block' : 'none';
+
+    if (tab === 'history') {
+      if (historyUnlocked) {
+        showUnlockedHistory();
+      } else {
+        document.getElementById('lock-screen').style.display = 'block';
+        document.getElementById('history-unlocked').style.display = 'none';
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-error').style.display = 'none';
+        setTimeout(() => document.getElementById('pin-input').focus(), 150);
+      }
+    }
+  }
+
+  function checkPin() {
+    const input = document.getElementById('pin-input');
+    const pin = input.value;
+    if (!pin) return;
+
+    if (!isConfigured()) {
+      document.getElementById('pin-error').textContent = '保存先が設定されていません。設定手順をご確認ください。';
+      document.getElementById('pin-error').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('pin-error').style.display = 'none';
+    setLockButtonLoading(true);
+
+    fetchHistory(pin, function (data) {
+      setLockButtonLoading(false);
+
+      if (!data || data.error) {
+        document.getElementById('pin-error').textContent = '暗証番号が正しくありません';
+        document.getElementById('pin-error').style.display = 'block';
+        input.value = '';
+        input.focus();
+        return;
+      }
+
+      currentPin = pin;
+      historyUnlocked = true;
+      historyLoaded = true;
+      input.value = '';
+      showUnlockedHistory();
+      renderHistory(data);
+    }, function () {
+      setLockButtonLoading(false);
+      document.getElementById('pin-error').textContent = '読み込みに失敗しました。通信環境をご確認ください。';
+      document.getElementById('pin-error').style.display = 'block';
+    });
+  }
+
+  function setLockButtonLoading(isLoading) {
+    const btn = document.querySelector('.lock-btn');
+    btn.disabled = isLoading;
+    btn.textContent = isLoading ? '確認中…' : '開く';
+  }
+
+  function showUnlockedHistory() {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('history-unlocked').style.display = 'block';
+  }
+
+  function lockHistory() {
+    historyUnlocked = false;
+    historyLoaded = false;
+    currentPin = null;
+    document.getElementById('history-content').innerHTML = '';
+    document.querySelector('.tab[data-tab="input"]').click();
+  }
+
+  /* ---------- 発送リスト ---------- */
   function addItem() {
     const list = document.getElementById('ship-list');
     const div = document.createElement('div');
@@ -360,7 +683,6 @@
   function removeItem(btn) {
     const list = document.getElementById('ship-list');
     if (list.children.length <= 1) {
-      // 最後の1行はクリアするだけ
       const inputs = btn.closest('.ship-item').querySelectorAll('input');
       inputs.forEach(i => i.value = '');
     } else {
@@ -368,6 +690,7 @@
     }
   }
 
+  /* ---------- フォーマット用ヘルパー ---------- */
   function fmtTime(t) {
     if (!t) return '−';
     const [h, m] = t.split(':');
@@ -376,11 +699,28 @@
 
   function fmtYen(v) {
     const n = parseInt(v, 10);
-    if (isNaN(n)) return '−';
+    if (isNaN(n)) return '¥0';
     return '¥' + n.toLocaleString('ja-JP');
   }
 
-  function buildText() {
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  function getShippingItems() {
+    const items = [];
+    document.querySelectorAll('#ship-list .ship-item').forEach(row => {
+      const name = row.querySelector('input[type="text"]').value.trim();
+      const qty  = row.querySelector('input[type="number"]').value;
+      if (name && qty) items.push(`${name} ${qty}個`);
+    });
+    return items;
+  }
+
+  /* ---------- プレビュー文章作成 ---------- */
+  function buildText(eventName) {
     const now = new Date();
     const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${'日月火水木金土'[now.getDay()]}）`;
 
@@ -390,18 +730,13 @@
     const sales    = fmtYen(document.getElementById('sales').value);
     const report   = document.getElementById('report').value.trim() || '（なし）';
 
-    // 発送リスト
-    const items = [];
-    document.querySelectorAll('#ship-list .ship-item').forEach(row => {
-      const name = row.querySelector('input[type="text"]').value.trim();
-      const qty  = row.querySelector('input[type="number"]').value;
-      if (name && qty) items.push(`　・${name}　${qty}個`);
-    });
-    const shipStr = items.length ? items.join('\n') : '　なし';
+    const items = getShippingItems();
+    const shipStr = items.length ? items.map(i => `　・${i}`).join('\n') : '　なし';
 
     return [
       `📋 販売日報`,
       `━━━━━━━━━━━━━━━`,
+      `🏷 イベント　${eventName}`,
       `📅 日付　　${dateStr}`,
       `👤 担当者　${staff}`,
       `🕐 勤務時間　${timeFrom} 〜 ${timeTo}`,
@@ -418,6 +753,7 @@
     ].join('\n');
   }
 
+  /* ---------- 送信 ---------- */
   function submitReport() {
     const staff = document.getElementById('staff').value.trim();
     if (!staff) {
@@ -426,9 +762,21 @@
       return;
     }
 
-    const text = buildText();
+    const eventName = document.getElementById('event-name').value.trim() || '通常営業';
+    const text = buildText(eventName);
+
     document.getElementById('preview-text').textContent = text;
     document.getElementById('preview-wrap').style.display = 'block';
+
+    saveToSheet({
+      event:    eventName,
+      staff:    staff,
+      timeFrom: document.getElementById('time-from').value,
+      timeTo:   document.getElementById('time-to').value,
+      sales:    document.getElementById('sales').value || 0,
+      report:   document.getElementById('report').value.trim(),
+      shipping: getShippingItems().join('\n')
+    });
 
     const now = new Date();
     document.getElementById('modal-time').textContent =
@@ -451,6 +799,277 @@
       setTimeout(() => btn.innerHTML = '📋 テキストをコピー', 2000);
     });
   }
+
+  /* ---------- スプレッドシートへ保存（POST） ---------- */
+  function saveToSheet(data) {
+    if (!isConfigured()) return;
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(data)
+    }).then(() => {
+      historyLoaded = false; // 次回タブを開いたら再読込
+    }).catch(() => {});
+  }
+
+  /* ---------- 記録の読み込み（GET / JSONP、暗証番号付き） ---------- */
+  function fetchHistory(pin, onSuccess, onError) {
+    const callbackName = 'handleHistory_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+    const script = document.createElement('script');
+
+    window[callbackName] = function (data) {
+      delete window[callbackName];
+      script.remove();
+      onSuccess(data);
+    };
+
+    script.src = SCRIPT_URL + '?callback=' + callbackName + '&pin=' + encodeURIComponent(pin);
+    script.onerror = function () {
+      delete window[callbackName];
+      script.remove();
+      if (onError) onError();
+    };
+    document.body.appendChild(script);
+  }
+
+  function loadHistory() {
+    if (!currentPin) return;
+
+    const loadingEl = document.getElementById('history-loading');
+    const contentEl = document.getElementById('history-content');
+    const summaryEl = document.getElementById('history-summary');
+
+    contentEl.innerHTML = '';
+    summaryEl.style.display = 'none';
+    loadingEl.style.display = 'block';
+    loadingEl.textContent = '読み込み中…';
+
+    fetchHistory(currentPin, function (data) {
+      if (!data || data.error) {
+        loadingEl.innerHTML = '⚠️ 読み込みに失敗しました。一度ロックして開き直してください。';
+        return;
+      }
+      loadingEl.style.display = 'none';
+      historyLoaded = true;
+      renderHistory(data);
+    }, function () {
+      loadingEl.innerHTML = '⚠️ 読み込みに失敗しました。通信環境をご確認ください。';
+    });
+  }
+
+  /* ---------- 記録の表示 ---------- */
+  function renderHistory(data) {
+    const contentEl = document.getElementById('history-content');
+    const summaryEl = document.getElementById('history-summary');
+
+    if (!data || data.length === 0) {
+      contentEl.innerHTML = '<div class="empty-state">まだ記録がありません。<br>「報告する」タブから記録すると<br>ここに表示されます。</div>';
+      return;
+    }
+
+    // 全体集計
+    const totalSales = data.reduce((sum, e) => sum + (parseInt(e['売上金額']) || 0), 0);
+    const totalCount = data.length;
+
+    // イベントごとにグループ化
+    const groups = {};
+    data.forEach(row => {
+      const ev = row['イベント名'] || '通常営業';
+      if (!groups[ev]) groups[ev] = [];
+      groups[ev].push(row);
+    });
+
+    Object.values(groups).forEach(arr => {
+      arr.sort((a, b) => new Date(b['タイムスタンプ']) - new Date(a['タイムスタンプ']));
+    });
+
+    const sortedEvents = Object.keys(groups).sort((a, b) => {
+      return new Date(groups[b][0]['タイムスタンプ']) - new Date(groups[a][0]['タイムスタンプ']);
+    });
+
+    summaryEl.style.display = 'flex';
+    summaryEl.innerHTML = `
+      <div class="summary-item">
+        <div class="summary-value">¥${totalSales.toLocaleString('ja-JP')}</div>
+        <div class="summary-label">総売上</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">${totalCount}</div>
+        <div class="summary-label">報告件数</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value">${sortedEvents.length}</div>
+        <div class="summary-label">イベント数</div>
+      </div>
+    `;
+
+    contentEl.innerHTML = sortedEvents.map((eventName, idx) => {
+      const entries = groups[eventName];
+      const total = entries.reduce((sum, e) => sum + (parseInt(e['売上金額']) || 0), 0);
+
+      const entriesHtml = entries.map(e => {
+        const d = new Date(e['タイムスタンプ']);
+        const dateStr = isNaN(d) ? '' : `${d.getMonth()+1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）`;
+        const sales = parseInt(e['売上金額']) || 0;
+        const report = (e['今日の報告'] || '').toString().trim();
+        const shipping = (e['追加発送依頼'] || '').toString().trim();
+
+        return `
+          <div class="entry">
+            <div class="entry-top">
+              <span class="entry-date">${dateStr}</span>
+              <span class="entry-amount">¥${sales.toLocaleString('ja-JP')}</span>
+            </div>
+            <div class="entry-meta">${escapeHtml(e['担当者名'] || '−')}　|　${escapeHtml(e['出勤(から)'] || '')} 〜 ${escapeHtml(e['出勤(まで)'] || '')}</div>
+            ${report ? `<div class="entry-report">${escapeHtml(report).replace(/\n/g, '<br>')}</div>` : ''}
+            ${shipping ? `<div class="entry-ship">📦 ${escapeHtml(shipping).replace(/\n/g, '<br>')}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="event-group">
+          <div class="event-header" onclick="toggleEvent(${idx})">
+            <div>
+              <div class="name">${escapeHtml(eventName)}</div>
+              <div class="meta">${entries.length}件の報告</div>
+            </div>
+            <div class="right">
+              <div class="total">¥${total.toLocaleString('ja-JP')}</div>
+              <div class="arrow" id="arrow-${idx}">▾</div>
+            </div>
+          </div>
+          <div class="event-body" id="event-body-${idx}">
+            ${entriesHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleEvent(idx) {
+    const body = document.getElementById('event-body-' + idx);
+    const header = body.previousElementSibling;
+    body.classList.toggle('open');
+    header.classList.toggle('open');
+  }
+
+  /* ---------- イベント選択 ---------- */
+  function loadEventOptions() {
+    if (!isConfigured()) {
+      allEvents = ['通常営業'];
+      return;
+    }
+
+    const callbackName = 'handleEvents_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+    const script = document.createElement('script');
+
+    window[callbackName] = function (names) {
+      delete window[callbackName];
+      script.remove();
+      if (!names || !names.length) names = ['通常営業'];
+      allEvents = names;
+    };
+
+    script.src = SCRIPT_URL + '?action=events&callback=' + callbackName;
+    script.onerror = function () {
+      delete window[callbackName];
+      allEvents = ['通常営業'];
+    };
+    document.body.appendChild(script);
+  }
+
+  function getRecentEvents() {
+    try {
+      const raw = localStorage.getItem(RECENT_EVENTS_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function addRecentEvent(name) {
+    let recents = getRecentEvents().filter(n => n !== name);
+    recents.unshift(name);
+    recents = recents.slice(0, 4);
+    try { localStorage.setItem(RECENT_EVENTS_KEY, JSON.stringify(recents)); } catch (e) {}
+  }
+
+  function openEventPicker() {
+    document.getElementById('event-search').value = '';
+    renderRecentChips();
+    renderEventList(allEvents);
+    document.getElementById('event-picker-overlay').classList.add('show');
+    setTimeout(() => document.getElementById('event-search').focus(), 150);
+  }
+
+  function closeEventPicker() {
+    document.getElementById('event-picker-overlay').classList.remove('show');
+  }
+
+  function filterEventList() {
+    const q = document.getElementById('event-search').value.trim();
+    const filtered = q ? allEvents.filter(n => n.indexOf(q) !== -1) : allEvents;
+    renderEventList(filtered);
+  }
+
+  function renderRecentChips() {
+    const container = document.getElementById('picker-recent');
+    const recents = getRecentEvents().filter(n => allEvents.indexOf(n) !== -1);
+    if (!recents.length) {
+      container.innerHTML = '';
+      return;
+    }
+    container.innerHTML = '<div class="recent-label">最近使った</div>' +
+      recents.map(n => `<span class="recent-chip" data-event="${escapeHtml(n)}">${escapeHtml(n)}</span>`).join('');
+  }
+
+  function renderEventList(list) {
+    const container = document.getElementById('picker-list');
+    const current = document.getElementById('event-name').value;
+
+    if (!list.length) {
+      container.innerHTML = '<div class="picker-empty">該当するイベントが見つかりません</div>';
+      return;
+    }
+
+    container.innerHTML = list.map(n => {
+      const sel = (n === current) ? ' selected' : '';
+      return `<div class="picker-item${sel}" data-event="${escapeHtml(n)}">${escapeHtml(n)}</div>`;
+    }).join('');
+  }
+
+  function selectEvent(name) {
+    document.getElementById('event-name').value = name;
+    document.getElementById('event-picker-label').textContent = name;
+    addRecentEvent(name);
+    closeEventPicker();
+  }
+
+  /* ---------- 初期化 ---------- */
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!isConfigured()) {
+      document.getElementById('config-banner').style.display = 'block';
+    }
+
+    loadEventOptions();
+
+    document.getElementById('picker-recent').addEventListener('click', function (e) {
+      const chip = e.target.closest('.recent-chip');
+      if (chip) selectEvent(chip.dataset.event);
+    });
+
+    document.getElementById('picker-list').addEventListener('click', function (e) {
+      const item = e.target.closest('.picker-item');
+      if (item) selectEvent(item.dataset.event);
+    });
+
+    document.getElementById('event-picker-overlay').addEventListener('click', function (e) {
+      if (e.target === this) closeEventPicker();
+    });
+  });
 </script>
 </body>
 </html>
